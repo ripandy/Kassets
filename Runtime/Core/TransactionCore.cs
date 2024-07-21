@@ -114,33 +114,33 @@ namespace Kadinche.Kassets.Transaction
             return new ResponseSubscription<TRequest, TResponse>(this, responseFunc);
         }
 
-        private IDisposable HandleSubscribeToResponse(Action action)
+        private IDisposable HandleSubscribeToResponse(Action action, bool buffered = false)
         {
             var subscription = new Subscription(action, responseSubscribers);
-            if (!responseSubscribers.Contains(subscription))
-            {
-                responseSubscribers.Add(subscription);
+            
+            if (responseSubscribers.Contains(subscription)) return subscription;
+            
+            responseSubscribers.Add(subscription);
 
-                if (buffered)
-                {
-                    subscription.Invoke();
-                }
+            if (buffered)
+            {
+                subscription.Invoke();
             }
 
             return subscription;
         }
         
-        private IDisposable HandleSubscribeToResponse(Action<TResponse> action)
+        private IDisposable HandleSubscribeToResponse(Action<TResponse> action, bool buffered = false)
         {
             var subscription = new Subscription<TResponse>(action, responseSubscribers);
-            if (!responseSubscribers.Contains(subscription))
-            {
-                responseSubscribers.Add(subscription);
+            
+            if (responseSubscribers.Contains(subscription)) return subscription;
+            
+            responseSubscribers.Add(subscription);
 
-                if (buffered)
-                {
-                    subscription.Invoke(responseValue);
-                }
+            if (buffered)
+            {
+                subscription.Invoke(responseValue);
             }
 
             return subscription;
