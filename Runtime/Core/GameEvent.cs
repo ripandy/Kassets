@@ -1,6 +1,4 @@
-﻿#if !KASSETS_UNIRX && !KASSETS_UNITASK && !KASSETS_R3
-#define KASSETS_STANDALONE
-
+﻿#if !KASSETS_R3
 using System.Collections.Generic;
 #endif
 
@@ -43,14 +41,9 @@ namespace Kadinche.Kassets.EventSystem
         }
     }
 
-#if KASSETS_STANDALONE
+#if !KASSETS_R3
     public partial class GameEvent
     {
-        [Tooltip("Whether to listen to previous event upon subscription.")]
-        [SerializeField] protected bool buffered;
-        
-        public IDisposable Subscribe(Action action) => Subscribe(action, buffered);
-        
         protected readonly IList<IDisposable> disposables = new List<IDisposable>();
 
         /// <summary>
@@ -60,24 +53,24 @@ namespace Kadinche.Kassets.EventSystem
         {
             foreach (var disposable in disposables)
             {
-                if (disposable is Subscription subscription)
-                {
-                    subscription.Invoke();
-                }
+                if (disposable is not Subscription subscription) continue;
+                subscription.Invoke();
             }
         }
+
+        public IDisposable Subscribe(Action action) => Subscribe(action, withBuffer: false);
 
         public IDisposable Subscribe(Action action, bool withBuffer)
         {
             var subscription = new Subscription(action, disposables);
-            if (!disposables.Contains(subscription))
-            {
-                disposables.Add(subscription);
+            
+            if (disposables.Contains(subscription)) return subscription;
+            
+            disposables.Add(subscription);
                 
-                if (withBuffer)
-                {
-                    subscription.Invoke();
-                }
+            if (withBuffer)
+            {
+                subscription.Invoke();
             }
 
             return subscription;
@@ -102,26 +95,24 @@ namespace Kadinche.Kassets.EventSystem
             base.Raise();
             foreach (var disposable in disposables)
             {
-                if (disposable is Subscription<T> subscription)
-                {
-                    subscription.Invoke(_value);
-                }
+                if (disposable is not Subscription<T> subscription) continue;
+                subscription.Invoke(_value);
             }
         }
 
-        public IDisposable Subscribe(Action<T> action) => Subscribe(action, buffered);
+        public IDisposable Subscribe(Action<T> action) => Subscribe(action, false);
 
         public IDisposable Subscribe(Action<T> action, bool withBuffer)
         {
             var subscription = new Subscription<T>(action, disposables);
-            if (!disposables.Contains(subscription))
-            {
-                disposables.Add(subscription);
+            
+            if (disposables.Contains(subscription)) return subscription;
+            
+            disposables.Add(subscription);
 
-                if (withBuffer)
-                {
-                    subscription.Invoke(_value);
-                }
+            if (withBuffer)
+            {
+                subscription.Invoke(_value);
             }
 
             return subscription;
