@@ -3,7 +3,6 @@ using System.Collections.Generic;
 #endif
 
 using System;
-using Kadinche.Kassets.CommandSystem;
 using UnityEngine;
 
 namespace Kadinche.Kassets.EventSystem
@@ -12,9 +11,8 @@ namespace Kadinche.Kassets.EventSystem
     /// Core Game Event System.
     /// </summary>
     [CreateAssetMenu(fileName = "GameEvent", menuName = MenuHelper.DefaultGameEventMenu + "GameEvent")]
-    public partial class GameEvent : CommandCore, IGameEventRaiser, IGameEventHandler
+    public partial class GameEvent : KassetsCore, IGameEventRaiser, IGameEventHandler
     {
-        public override void Execute() => Raise();
     }
 
     /// <summary>
@@ -79,7 +77,6 @@ namespace Kadinche.Kassets.EventSystem
         public override void Dispose()
         {
             disposables.Dispose();
-            base.Dispose();
         }
     }
 
