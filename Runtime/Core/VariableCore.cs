@@ -24,11 +24,11 @@ namespace Kadinche.Kassets.Variable
 
         public override void Raise(T value)
         {
-            if (variableEventType == VariableEventType.ValueChange && IsValueChanged(value)) return;
+            if (variableEventType == VariableEventType.ValueChange && IsValueEquals(value)) return;
             base.Raise(value);
         }
 
-        private bool IsValueChanged(T value) => _value == null && value == null ||
+        private bool IsValueEquals(T value) => _value == null && value == null ||
                                                 _value != null && value != null && _value.Equals(value);
         
         private T _initialValue;
