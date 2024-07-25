@@ -221,7 +221,7 @@ namespace Kadinche.Kassets.Collection
         private void RaiseCount() => _countSubject.OnNext(Count);
         private void RaiseValueAt(int index, T value)
         {
-            if (variableEventType == VariableEventType.ValueChange && _value[index].Equals(value))
+            if (valueEventType == ValueEventType.ValueChange && _list[index].Equals(value))
                 return;
 
             if (_valueSubjects.TryGetValue(index, out var subject))
@@ -295,7 +295,7 @@ namespace Kadinche.Kassets.Collection
     {
         private void RaiseValue(TKey key, TValue value)
         {
-            if (variableEventType == VariableEventType.ValueChange && _activeDictionary[key].Equals(value))
+            if (valueEventType == ValueEventType.ValueChange && _dictionary[key].Equals(value))
                 return;
             
             if (_valueSubjects.TryGetValue(key, out var subject))

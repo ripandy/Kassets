@@ -10,8 +10,8 @@ namespace Kadinche.Kassets.Variable
     /// <typeparam name="T">Type to use on variable system</typeparam>
     public abstract partial class VariableCore<T> : GameEvent<T>, IVariable<T>
     {
-        [Tooltip("Set how variable event behave.\nValue Assign: Raise when value is assigned regardless of value.\nValue Changed: Raise only when value is changed.")]
-        [SerializeField] protected VariableEventType variableEventType;
+        [Tooltip("Set how value event behave.\nValue Assign: Raise when value is assigned regardless of value.\nValue Changed: Raise only when value is changed.")]
+        [SerializeField] protected ValueEventType valueEventType;
 
         [Tooltip("If true will reset value when play mode end. Otherwise, keep runtime value. Due to shallow copying of class types, it is better avoid using autoResetValue on Class type.")]
         [SerializeField] protected bool autoResetValue;
@@ -24,7 +24,7 @@ namespace Kadinche.Kassets.Variable
 
         public override void Raise(T value)
         {
-            if (variableEventType == VariableEventType.ValueChange && IsValueEquals(value)) return;
+            if (valueEventType == ValueEventType.ValueChange && IsValueEquals(value)) return;
             base.Raise(value);
         }
 

@@ -14,7 +14,7 @@ namespace Kadinche.Kassets
         public const string DefaultOtherMenu = "Kassets/Others/";
     }
     
-    public enum VariableEventType
+    public enum ValueEventType
     {
         ValueAssign,
         ValueChange
