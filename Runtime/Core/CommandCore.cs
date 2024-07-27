@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,19 +5,26 @@ namespace Kadinche.Kassets.CommandSystem
 {
     public abstract class CommandCore : KassetsCore, ICommand
     {
-        protected CancellationTokenSource cts;
+        private CancellationTokenSource cts;
+        protected CancellationToken DefaultToken
+        {
+            get
+            {
+                cts ??= new CancellationTokenSource();
+                return cts.Token;
+            }
+        }
         
         public abstract void Execute();
 
-        public virtual ValueTask ExecuteAsync(CancellationToken cancellationToken)
+        public virtual async ValueTask ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                throw new OperationCanceledException();
-            }
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
+            var token = linkedTokenSource.Token;
+            token.ThrowIfCancellationRequested();
             
             Execute();
-            return new ValueTask(Task.CompletedTask);
+            await Task.CompletedTask;
         }
         
         public ValueTask ExecuteAsync() => ExecuteAsync(cts.Token);
@@ -41,17 +47,16 @@ namespace Kadinche.Kassets.CommandSystem
         public override void Execute() => Execute(default);
         public abstract void Execute(T param);
 
-        public virtual ValueTask ExecuteAsync(T param, CancellationToken cancellationToken)
+        public virtual async ValueTask ExecuteAsync(T param, CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                throw new OperationCanceledException();
-            }
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
+            var token = linkedTokenSource.Token;
+            token.ThrowIfCancellationRequested();
             
             Execute(param);
-            return new ValueTask(Task.CompletedTask);
+            await Task.CompletedTask;
         }
         
-        public ValueTask ExecuteAsync(T param) => ExecuteAsync(param, cts.Token);
+        public async ValueTask ExecuteAsync(T param) => await ExecuteAsync(param, DefaultToken);
     }
 }
