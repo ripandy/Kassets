@@ -1,19 +1,30 @@
 #if KASSETS_R3
+
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using R3;
 
 namespace Kadinche.Kassets.Collection
 {
     public abstract partial class Collection<T>
     {
-        #region Event Handling
+        private CancellationTokenSource cts;
+        protected CancellationToken DefaultToken
+        {
+            get
+            {
+                cts ??= new CancellationTokenSource();
+                return cts.Token;
+            }
+        }
 
-        private readonly Subject<T> _onAddSubject = new Subject<T>();
-        private readonly Subject<T> _onRemoveSubject = new Subject<T>();
-        private readonly Subject<object> _onClearSubject = new Subject<object>();
-        private readonly Subject<int> _countSubject = new Subject<int>();
-        private readonly IDictionary<int, Subject<T>> _valueSubjects = new Dictionary<int, Subject<T>>();
+        private readonly Subject<T> _onAddSubject = new();
+        private readonly Subject<T> _onRemoveSubject = new();
+        private readonly Subject<object> _onClearSubject = new();
+        private readonly Subject<int> _countSubject = new();
+        private readonly Dictionary<int, Subject<T>> _valueSubjects = new();
 
         public Observable<T> OnAddObservable() => _onAddSubject;
         public Observable<T> OnRemoveObservable() => _onRemoveSubject;
@@ -22,133 +33,140 @@ namespace Kadinche.Kassets.Collection
 
         public Observable<T> ValueAtObservable(int index)
         {
-            if (!_valueSubjects.TryGetValue(index, out var elementSubject))
-            {
-                elementSubject = new Subject<T>();
-                _valueSubjects.Add(index, elementSubject);
-            }
+            if (_valueSubjects.TryGetValue(index, out var elementSubject)) return elementSubject;
+            
+            elementSubject = new Subject<T>();
+            _valueSubjects.Add(index, elementSubject);
 
             return elementSubject;
         }
-
-        #endregion
+        
+        public async ValueTask<T> OnAddAsync(CancellationToken cancellationToken = default)
+        {
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
+            return await _onAddSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+        }
+        
+        public async ValueTask<T> OnRemoveAsync(CancellationToken cancellationToken = default)
+        {
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
+            return await _onRemoveSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+        }
+        
+        public async ValueTask OnClearAsync(CancellationToken cancellationToken = default)
+        {
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
+            await _onClearSubject.WaitAsync(cancellationToken: linkedTokenSource.Token);
+        }
+        
+        public async ValueTask<int> CountAsync(CancellationToken cancellationToken = default)
+        {
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
+            return await _countSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+        }
+        
+        public async ValueTask<T> ValueAtAsync(int index, CancellationToken cancellationToken = default)
+        {
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
+            return await ValueAtObservable(index).LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+        }
     }
 
     public abstract partial class Collection<TKey, TValue>
     {
-        #region Event Handling
-        
-        private readonly IDictionary<TKey, Subject<TValue>> _valueSubjects = new Dictionary<TKey, Subject<TValue>>();
+        private readonly Dictionary<TKey, Subject<TValue>> _valueSubjects = new();
         
         public Observable<TValue> ValueAtObservable(TKey key)
         {
-            if (!_valueSubjects.TryGetValue(key, out var elementSubject))
-            {
-                elementSubject = new Subject<TValue>();
-                _valueSubjects.Add(key, elementSubject);
-            }
+            if (_valueSubjects.TryGetValue(key, out var elementSubject)) return elementSubject;
+            
+            elementSubject = new Subject<TValue>();
+            _valueSubjects.Add(key, elementSubject);
 
             return elementSubject;
         }
-
-        #endregion
+        
+        public async ValueTask<TValue> ValueAtAsync(TKey key, CancellationToken cancellationToken = default)
+        {
+            var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
+            return await ValueAtObservable(key).LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+        }
     }
     
-#if KASSETS_UNIRX
     public abstract partial class Collection<T>
     {
-        #region Event Handling
-        
-        public IObservable<T> OnAddSystemObservable() => _onAddSubject.AsSystemObservable();
-        public IObservable<T> OnRemoveSystemObservable() => _onRemoveSubject.AsSystemObservable();
-        public IObservable<object> OnClearSystemObservable() => _onClearSubject.AsSystemObservable();
-        public IObservable<int> CountSystemObservable() => _countSubject.AsSystemObservable();
-
-        public IObservable<T> ValueAtSystemObservable(int index)
+        private partial void RaiseOnAdd(T addedValue)
         {
-            if (!_valueSubjects.TryGetValue(index, out var elementSubject))
-            {
-                elementSubject = new Subject<T>();
-                _valueSubjects.Add(index, elementSubject);
-            }
-
-            return elementSubject.AsSystemObservable();
+            _onAddSubject.OnNext(addedValue);
         }
 
-        #endregion
-    }
-
-    public abstract partial class Collection<TKey, TValue>
-    {
-        #region Event Handling
-        
-        public IObservable<TValue> ValueAtSystemObservable(TKey key)
+        private partial void RaiseOnRemove(T removedValue)
         {
-            if (!_valueSubjects.TryGetValue(key, out var elementSubject))
-            {
-                elementSubject = new Subject<TValue>();
-                _valueSubjects.Add(key, elementSubject);
-            }
-
-            return elementSubject.AsSystemObservable();
+            _onRemoveSubject.OnNext(removedValue);
         }
 
-        #endregion
-    }
-#endif
-    
-#if KASSETS_UNITASK
-    public abstract partial class Collection<T>
-    {
-        private void RaiseOnAdd_UniRx(T addedValue) => _onAddSubject.OnNext(addedValue);
-        private void RaiseOnRemove_UniRx(T removedValue) => _onRemoveSubject.OnNext(removedValue);
-        private void RaiseOnClear_UniRx() => _onClearSubject.OnNext(this);
-        private void RaiseCount_UniRx() => _countSubject.OnNext(Count);
-        private void RaiseValueAt_UniRx(int index, T value)
+        private partial void RaiseOnClear()
         {
-            if (variableEventType == VariableEventType.ValueChange && _value[index].Equals(value))
+            _onClearSubject.OnNext(this);
+        }
+
+        private partial void RaiseCount()
+        {
+            _countSubject.OnNext(Count);
+        }
+
+        private partial void RaiseValueAt(int index, T value)
+        {
+            if (valueEventType == ValueEventType.ValueChange && list[index].Equals(value))
+            {
                 return;
+            }
 
             if (_valueSubjects.TryGetValue(index, out var subject))
             {
                 subject.OnNext(value);
             }
         }
-        
-        private IDisposable SubscribeOnAdd_UniRx(Action<T> action)
+
+        public partial IDisposable SubscribeOnAdd(Action<T> action)
         {
             return _onAddSubject.Subscribe(action);
         }
 
-        private IDisposable SubscribeOnRemove_UniRx(Action<T> action)
+        public partial IDisposable SubscribeOnRemove(Action<T> action)
         {
             return _onRemoveSubject.Subscribe(action);
         }
 
-        private IDisposable SubscribeOnClear_UniRx(Action action)
+        public partial IDisposable SubscribeOnClear(Action action)
         {
             return _onClearSubject.Subscribe(_ => action.Invoke());
         }
         
-        private IDisposable SubscribeToCount_UniRx(Action<int> action)
+        public partial IDisposable SubscribeToCount(Action<int> action)
         {
             return _countSubject.Subscribe(action);
         }
 
-        private IDisposable SubscribeToValueAt_UniRx(int index, Action<T> action)
+        public partial IDisposable SubscribeToValueAt(int index, Action<T> action)
         {
             return ValueAtObservable(index).Subscribe(action);
         }
-
-        private void IncrementValueSubscriptions_UniRx(int index)
+        
+        private partial void IncrementValueSubscriptions(int index)
         {
-            for (var i = _value.Count; i > index; i--)
+            for (var i = list.Count; i > index; i--)
             {
                 _valueSubjects.TryChangeKey(i - 1, i);
             }
         }
         
-        private void ClearValueSubscriptions_UniRx()
+        private partial void SwitchValueSubscription(int oldIndex, int newIndex)
+        {
+            _valueSubjects.TryChangeKey(oldIndex, newIndex);
+        }
+        
+        private partial void ClearValueSubscriptions()
         {
             foreach (var subject in _valueSubjects.Values)
             {
@@ -157,146 +175,38 @@ namespace Kadinche.Kassets.Collection
             _valueSubjects.Clear();
         }
         
-        private void RemoveValueSubscription_UniRx(int index)
+        private partial void RemoveValueSubscription(int index)
         {
-            if (_valueSubjects.TryGetValue(index, out var subject))
-            {
-                subject.Dispose();
-                _valueSubjects.Remove(index);
-            }
+            if (!_valueSubjects.TryGetValue(index, out var subject)) return;
+            subject.Dispose();
+            _valueSubjects.Remove(index);
         }
 
-        private void DisposeSubscriptions_UniRx()
-        {
-            _onAddSubject.Dispose();
-            _onRemoveSubject.Dispose();
-            _onClearSubject.Dispose();
-            _countSubject.Dispose();
-            ClearValueSubscriptions_UniRx();
-        }
-    }
-
-    public abstract partial class Collection<TKey, TValue>
-    {
-        private void RaiseValue_UniRx(TKey key, TValue value)
-        {
-            if (variableEventType == VariableEventType.ValueChange && _activeDictionary[key].Equals(value))
-                return;
-            
-            if (_valueSubjects.TryGetValue(key, out var subject))
-            {
-                subject.OnNext(value);
-            }
-        }
-        
-        public IDisposable SubscribeToValue_UniRx(TKey key, Action<TValue> action)
-        {
-            return ValueAtObservable(key).Subscribe(action);
-        }
-        
-        private void ClearValueSubscriptions_UniRx()
-        {
-            foreach (var subject in _valueSubjects.Values)
-            {
-                subject.Dispose();
-            }
-            _valueSubjects.Clear();
-        }
-        
-        private void RemoveValueSubscription_UniRx(TKey key)
-        {
-            if (_valueSubjects.TryGetValue(key, out var subject))
-            {
-                subject.Dispose();
-                _valueSubjects.Remove(key);
-            }
-        }
-    }
-#else
-    public abstract partial class Collection<T>
-    {
-        private void RaiseOnAdd(T addedValue) => _onAddSubject.OnNext(addedValue);
-        private void RaiseOnRemove(T removedValue) => _onRemoveSubject.OnNext(removedValue);
-        private void RaiseOnClear() => _onClearSubject.OnNext(this);
-        private void RaiseCount() => _countSubject.OnNext(Count);
-        private void RaiseValueAt(int index, T value)
-        {
-            if (valueEventType == ValueEventType.ValueChange && _list[index].Equals(value))
-                return;
-
-            if (_valueSubjects.TryGetValue(index, out var subject))
-            {
-                subject.OnNext(value);
-            }
-        }
-
-        public IDisposable SubscribeOnAdd(Action<T> action)
-        {
-            return _onAddSubject.Subscribe(action);
-        }
-
-        public IDisposable SubscribeOnRemove(Action<T> action)
-        {
-            return _onRemoveSubject.Subscribe(action);
-        }
-
-        public IDisposable SubscribeOnClear(Action action)
-        {
-            return _onClearSubject.Subscribe(_ => action.Invoke());
-        }
-        
-        public IDisposable SubscribeToCount(Action<int> action)
-        {
-            return _countSubject.Subscribe(action);
-        }
-
-        public IDisposable SubscribeToValueAt(int index, Action<T> action)
-        {
-            return ValueAtObservable(index).Subscribe(action);
-        }
-        
-        private void IncrementValueSubscriptions(int index)
-        {
-            for (var i = _value.Count; i > index; i--)
-            {
-                _valueSubjects.TryChangeKey(i - 1, i);
-            }
-        }
-        
-        private void ClearValueSubscriptions()
-        {
-            foreach (var subject in _valueSubjects.Values)
-            {
-                subject.Dispose();
-            }
-            _valueSubjects.Clear();
-        }
-        
-        private void RemoveValueSubscription(int index)
-        {
-            if (_valueSubjects.TryGetValue(index, out var subject))
-            {
-                subject.Dispose();
-                _valueSubjects.Remove(index);
-            }
-        }
-
-        private void DisposeSubscriptions()
+        private partial void DisposeSubscriptions()
         {
             _onAddSubject.Dispose();
             _onRemoveSubject.Dispose();
             _onClearSubject.Dispose();
             _countSubject.Dispose();
             ClearValueSubscriptions();
+            cts?.CancelAndDispose();
+            cts = null;
         }
     }
     
     public abstract partial class Collection<TKey, TValue>
     {
-        private void RaiseValue(TKey key, TValue value)
+        public partial IDisposable SubscribeToValue(TKey key, Action<TValue> action)
         {
-            if (valueEventType == ValueEventType.ValueChange && _dictionary[key].Equals(value))
+            return ValueAtObservable(key).Subscribe(action);
+        }
+
+        private partial void RaiseValue(TKey key, TValue value)
+        {
+            if (valueEventType == ValueEventType.ValueChange && _dictionary.TryGetValue(key, out var value2) && value2.Equals(value))
+            {
                 return;
+            }
             
             if (_valueSubjects.TryGetValue(key, out var subject))
             {
@@ -304,12 +214,7 @@ namespace Kadinche.Kassets.Collection
             }
         }
 
-        public IDisposable SubscribeToValue(TKey key, Action<TValue> action)
-        {
-            return ValueAtObservable(key).Subscribe(action);
-        }
-        
-        private void ClearValueSubscriptions()
+        private partial void ClearValueSubscriptions()
         {
             foreach (var subject in _valueSubjects.Values)
             {
@@ -318,16 +223,13 @@ namespace Kadinche.Kassets.Collection
             _valueSubjects.Clear();
         }
         
-        private void RemoveValueSubscription(TKey key)
+        private partial void RemoveValueSubscription(TKey key)
         {
-            if (_valueSubjects.TryGetValue(key, out var subject))
-            {
-                subject.Dispose();
-                _valueSubjects.Remove(key);
-            }
+            if (!_valueSubjects.TryGetValue(key, out var subject)) return;
+            subject.Dispose();
+            _valueSubjects.Remove(key);
         }
     }
-#endif
 }
 
 #endif
