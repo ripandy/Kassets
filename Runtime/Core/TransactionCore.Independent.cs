@@ -39,7 +39,12 @@ namespace Kadinche.Kassets.Transaction
             return new ResponseSubscription<TRequest, TResponse>(this, responseFunc);
         }
 
-        private partial IDisposable HandleSubscribeToResponse(Action action, bool buffered)
+        private partial IDisposable HandleSubscribeToResponse(Action action)
+        {
+            return HandleSubscribeToResponse(action, false);
+        }
+
+        private IDisposable HandleSubscribeToResponse(Action action, bool buffered)
         {
             var subscription = new Subscription(action, responseSubscribers);
             
@@ -57,8 +62,13 @@ namespace Kadinche.Kassets.Transaction
 
             return subscription;
         }
+
+        private partial IDisposable HandleSubscribeToResponse(Action<TResponse> action)
+        {
+            return HandleSubscribeToResponse(action, false);
+        }
         
-        private partial IDisposable HandleSubscribeToResponse(Action<TResponse> action, bool buffered)
+        private IDisposable HandleSubscribeToResponse(Action<TResponse> action, bool buffered)
         {
             var subscription = new Subscription<TResponse>(action, responseSubscribers);
             

@@ -89,8 +89,8 @@ namespace Kadinche.Kassets.Transaction
         private partial void TryRespond();
         private partial void RaiseResponse(TResponse param);
         private partial IDisposable HandleSubscribe(Func<TRequest, TResponse> responseFunc);
-        private partial IDisposable HandleSubscribeToResponse(Action action, bool buffered = false);
-        private partial IDisposable HandleSubscribeToResponse(Action<TResponse> action, bool buffered = false);
+        private partial IDisposable HandleSubscribeToResponse(Action action);
+        private partial IDisposable HandleSubscribeToResponse(Action<TResponse> action);
         private partial void DisposeSubscriptions();
     }
 
