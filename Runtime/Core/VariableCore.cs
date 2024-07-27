@@ -34,7 +34,7 @@ namespace Kadinche.Kassets.Variable
         private T _initialValue;
         private string _initialValueJsonString; // Hack to handle shallow copy of class type. Better to avoid this on class type.
 
-        public virtual T InitialValue
+        public T InitialValue
         {
             get
             {
