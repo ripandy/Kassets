@@ -4,6 +4,12 @@ using UnityEngine;
 
 namespace Kadinche.Kassets
 {
+    public interface IJsonable { }
+    public interface IJsonable<T> : IJsonable
+    {
+        T Value { get; set; }
+    }
+    
     public static class KassetsJsonExtension
     {
         
@@ -18,37 +24,39 @@ namespace Kadinche.Kassets
         /// <summary>
         /// Load variable from json string
         /// </summary>
-        /// <param name="variable"></param>
+        /// <param name="jsonable"></param>
         /// <param name="jsonString"></param>
         /// <typeparam name="T"></typeparam>
-        public static void FromJsonString<T>(this IVariable<T> variable, string jsonString)
+        public static void FromJsonString<T>(this IJsonable<T> jsonable, string jsonString)
         {
             var simpleType = typeof(T).IsSimpleType();
             
             if (simpleType)
-                variable.Value = JsonUtility.FromJson<JsonableWrapper<T>>(jsonString).value;
+                jsonable.Value = JsonUtility.FromJson<JsonableWrapper<T>>(jsonString).value;
             else
-                variable.Value = JsonUtility.FromJson<T>(jsonString);
+                jsonable.Value = JsonUtility.FromJson<T>(jsonString);
         }
         
         /// <summary>
         /// Load variable from json string. Note that this uses Reflection.
         /// </summary>
-        /// <param name="variable"></param>
+        /// <param name="jsonable"></param>
         /// <param name="jsonString"></param>
-        public static void FromJsonString(this IVariable variable, string jsonString)
+        public static void FromJsonString(this IJsonable jsonable, string jsonString)
         {
             // Get the type of variable
-            var variableType = variable.GetType();
+            var variableType = jsonable.GetType();
             
-            while (!(variableType is { IsGenericType: true })) 
+            while (variableType is not { IsGenericType: true })
+            {
                 variableType = variableType?.BaseType;
+            }
 
             // Get the generic type of variable
             var genericType = variableType.GetGenericArguments()[0];
             var propertyInfo = variableType.GetProperty("Value");
             // Get the Value property of variable using reflection
-            var value = propertyInfo?.GetValue(variable);
+            var value = propertyInfo?.GetValue(jsonable);
 
             var simpleType = genericType.IsSimpleType();
             
@@ -67,22 +75,22 @@ namespace Kadinche.Kassets
             }
             
             // Get the Value property of variable using reflection and Set the value of the Value property.
-            propertyInfo?.SetValue(variable, value);
+            propertyInfo?.SetValue(jsonable, value);
         }
         
         /// <summary>
         /// Convert variable to json string
         /// </summary>
-        /// <param name="variable"></param>
+        /// <param name="jsonable"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static string ToJsonString<T>(this IVariable<T> variable)
+        public static string ToJsonString<T>(this IJsonable<T> jsonable)
         {
             var simpleType = typeof(T).IsSimpleType();
             
             var jsonString = simpleType ?
-                JsonUtility.ToJson(new JsonableWrapper<T>(variable.Value), Application.isEditor) :
-                JsonUtility.ToJson(variable.Value, Application.isEditor);
+                JsonUtility.ToJson(new JsonableWrapper<T>(jsonable.Value), Application.isEditor) :
+                JsonUtility.ToJson(jsonable.Value, Application.isEditor);
 
             return jsonString;
         }
@@ -90,20 +98,22 @@ namespace Kadinche.Kassets
         /// <summary>
         /// Convert variable to json string. Note that this uses Reflection.
         /// </summary>
-        /// <param name="variable"></param>
+        /// <param name="jsonable"></param>
         /// <returns></returns>
-        public static string ToJsonString(this IVariable variable)
+        public static string ToJsonString(this IJsonable jsonable)
         {
             // Get the type of variable
-            var variableType = variable.GetType();
+            var variableType = jsonable.GetType();
             
-            while (!(variableType is { IsGenericType: true })) 
+            while (variableType is not { IsGenericType: true })
+            {
                 variableType = variableType?.BaseType;
+            }
 
             // Get the generic type of variable
             var genericType = variableType.GetGenericArguments()[0];
             // Get the Value property of variable using reflection
-            var value = variableType.GetProperty("Value")?.GetValue(variable);
+            var value = variableType.GetProperty("Value")?.GetValue(jsonable);
 
             var simpleType = genericType.IsSimpleType();
             string jsonString;
@@ -126,57 +136,61 @@ namespace Kadinche.Kassets
         /// <summary>
         /// Load a json file from the given path.
         /// </summary>
-        /// <param name="variable">Reference to variable to load</param>
+        /// <param name="jsonable">Reference to variable to load</param>
         /// <param name="fullpath">Path to a directory where the json file exist. Path must include the json file.</param>
         /// <typeparam name="T">Data type to load. Must be serializable.</typeparam>
-        public static void LoadFromJson<T>(this IVariable<T> variable, string fullpath)
+        public static void LoadFromJson<T>(this IJsonable<T> jsonable, string fullpath)
         {
             if (!File.Exists(fullpath)) return;
             var jsonString = File.ReadAllText(fullpath);
-            FromJsonString(variable, jsonString);
+            FromJsonString(jsonable, jsonString);
         }
         
         /// <summary>
         /// Load a json file from the given path.
         /// </summary>
-        /// <param name="variable">Reference to variable to load</param>
+        /// <param name="jsonable">Reference to variable to load</param>
         /// <param name="fullpath">Path to a directory where the json file exist. Path must include the json file.</param>
-        public static void LoadFromJson(this IVariable variable, string fullpath)
+        public static void LoadFromJson(this IJsonable jsonable, string fullpath)
         {
             if (!File.Exists(fullpath)) return;
             var jsonString = File.ReadAllText(fullpath);
-            FromJsonString(variable, jsonString);
+            FromJsonString(jsonable, jsonString);
         }
         
         /// <summary>
         /// Load a json file from Unity's default data directory.
         /// </summary>
-        /// <param name="variable">Reference to variable to load</param>
+        /// <param name="jsonable">Reference to variable to load</param>
         /// <typeparam name="T">Data type to load. Must be serializable.</typeparam>
-        public static void LoadFromJson<T>(this IVariable<T> variable)
+        public static void LoadFromJson<T>(this IJsonable<T> jsonable)
         {
-            if (variable is ScriptableObject so)
-                LoadFromJson(variable, DefaultPath, so.name);
+            if (jsonable is ScriptableObject so)
+            {
+                LoadFromJson(jsonable, DefaultPath, so.name);
+            }
         }
         
         /// <summary>
         /// Load a json file from Unity's default data directory.
         /// </summary>
-        /// <param name="variable">Reference to variable to load</param>
-        public static void LoadFromJson(this IVariable variable)
+        /// <param name="jsonable">Reference to variable to load</param>
+        public static void LoadFromJson(this IJsonable jsonable)
         {
-            if (variable is ScriptableObject so)
-                LoadFromJson(variable, DefaultPath, so.name);
+            if (jsonable is ScriptableObject so)
+            {
+                LoadFromJson(jsonable, DefaultPath, so.name);
+            }
         }
         
         /// <summary>
         /// Load a json file from a directory.
         /// </summary>
-        /// <param name="variable">Reference to variable to load</param>
+        /// <param name="jsonable">Reference to variable to load</param>
         /// <param name="directory">Path to a directory where the json file exist</param>
         /// <param name="filename">Name of the json file</param>
         /// <typeparam name="T">Data type to load. Must be serializable.</typeparam>
-        public static void LoadFromJson<T>(this IVariable<T> variable, string directory, string filename)
+        public static void LoadFromJson<T>(this IJsonable<T> jsonable, string directory, string filename)
         {
             if (!Directory.Exists(directory))
             {
@@ -186,16 +200,16 @@ namespace Kadinche.Kassets
             
             var fn = filename.Split('.').Length < 2 ? filename + DefaultExtension : filename;
             var fullpath = Path.Combine(directory, fn);
-            LoadFromJson(variable, fullpath);
+            LoadFromJson(jsonable, fullpath);
         }
         
         /// <summary>
         /// Load a json file from a directory.
         /// </summary>
-        /// <param name="variable">Reference to variable to load</param>
+        /// <param name="jsonable">Reference to variable to load</param>
         /// <param name="directory">Path to a directory where the json file exist</param>
         /// <param name="filename">Name of the json file</param>
-        public static void LoadFromJson(this IVariable variable, string directory, string filename)
+        public static void LoadFromJson(this IJsonable jsonable, string directory, string filename)
         {
             if (!Directory.Exists(directory))
             {
@@ -205,140 +219,144 @@ namespace Kadinche.Kassets
             
             var fn = filename.Split('.').Length < 2 ? filename + DefaultExtension : filename;
             var fullpath = Path.Combine(directory, fn);
-            LoadFromJson(variable, fullpath);
+            LoadFromJson(jsonable, fullpath);
         }
         
         /// <summary>
         /// Load a json file with custom extension from a directory.
         /// </summary>
-        /// <param name="variable">Reference to variable to load</param>
+        /// <param name="jsonable">Reference to variable to load</param>
         /// <param name="directory">Path to a directory where the json file exist</param>
         /// <param name="filename">Name of the json file</param>
         /// <param name="extension">Custom extension of the json file</param>
         /// <typeparam name="T">Data type to load. Must be serializable.</typeparam>
-        public static void LoadFromJson<T>(this IVariable<T> variable, string directory, string filename, string extension)
+        public static void LoadFromJson<T>(this IJsonable<T> jsonable, string directory, string filename, string extension)
         {
             var ext = extension[0] == '.' ? extension : "." + extension;
             var filenameExt = $"{filename}{ext}";
-            LoadFromJson(variable, directory, filenameExt);
+            LoadFromJson(jsonable, directory, filenameExt);
         }
         
         /// <summary>
         /// Load a json file with custom extension from a directory.
         /// </summary>
-        /// <param name="variable">Reference to variable to load</param>
+        /// <param name="jsonable">Reference to variable to load</param>
         /// <param name="directory">Path to a directory where the json file exist</param>
         /// <param name="filename">Name of the json file</param>
         /// <param name="extension">Custom extension of the json file</param>
-        public static void LoadFromJson(this IVariable variable, string directory, string filename, string extension)
+        public static void LoadFromJson(this IJsonable jsonable, string directory, string filename, string extension)
         {
             var ext = extension[0] == '.' ? extension : "." + extension;
             var filenameExt = $"{filename}{ext}";
-            LoadFromJson(variable, directory, filenameExt);
+            LoadFromJson(jsonable, directory, filenameExt);
         }
         
         /// <summary>
         /// Save a variable into json file.
         /// </summary>
-        /// <param name="variable"></param>
+        /// <param name="jsonable"></param>
         /// <typeparam name="T"></typeparam>
-        public static void SaveToJson<T>(this IVariable<T> variable)
+        public static void SaveToJson<T>(this IJsonable<T> jsonable)
         {
-            if (variable is ScriptableObject so)
-                SaveToJson(variable, DefaultPath, so.name);
+            if (jsonable is ScriptableObject so)
+            {
+                SaveToJson(jsonable, DefaultPath, so.name);
+            }
         }
 
         /// <summary>
         /// Save a variable into json file.
         /// </summary>
-        /// <param name="variable"></param>
-        public static void SaveToJson(this IVariable variable)
+        /// <param name="jsonable"></param>
+        public static void SaveToJson(this IJsonable jsonable)
         {
-            if (variable is ScriptableObject so)
-                SaveToJson(variable, DefaultPath, so.name);
+            if (jsonable is ScriptableObject so)
+            {
+                SaveToJson(jsonable, DefaultPath, so.name);
+            }
         }
         
         /// <summary>
         /// Save a variable into json file to the given path.
         /// </summary>
-        /// <param name="variable">Variable to save.</param>
+        /// <param name="jsonable">Variable to save.</param>
         /// <param name="fullPath">Path to a directory where the json file would exist. Path must include the json filename and extension.</param>
         /// <typeparam name="T">Data type to save. Must be serializable.</typeparam>
-        public static void SaveToJson<T>(this IVariable<T> variable, string fullPath)
+        public static void SaveToJson<T>(this IJsonable<T> jsonable, string fullPath)
         {
-            var jsonString = ToJsonString(variable);
+            var jsonString = ToJsonString(jsonable);
             File.WriteAllText(fullPath, jsonString);
         }
         
         /// <summary>
         /// Save a variable into json file to the given path.
         /// </summary>
-        /// <param name="variable">Variable to save.</param>
+        /// <param name="jsonable">Variable to save.</param>
         /// <param name="fullPath">Path to a directory where the json file would exist. Path must include the json filename and extension.</param>
-        public static void SaveToJson(this IVariable variable, string fullPath)
+        public static void SaveToJson(this IJsonable jsonable, string fullPath)
         {
-            var jsonString = ToJsonString(variable);
+            var jsonString = ToJsonString(jsonable);
             File.WriteAllText(fullPath, jsonString);
         }
 
         /// <summary>
         /// Save a variable into json file to the given directory.
         /// </summary>
-        /// <param name="variable">Variable to save.</param>
+        /// <param name="jsonable">Variable to save.</param>
         /// <param name="directory">Path to a directory where the json file would exist</param>
         /// <param name="filename">Name of the json file</param>
         /// <typeparam name="T">Data type to save. Must be serializable.</typeparam>
-        public static void SaveToJson<T>(this IVariable<T> variable, string directory, string filename)
+        public static void SaveToJson<T>(this IJsonable<T> jsonable, string directory, string filename)
         {
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
             var fn = filename.Split('.').Length < 2 ? filename + DefaultExtension : filename;
             var fullPath = Path.Combine(directory, fn);
-            SaveToJson(variable, fullPath);
+            SaveToJson(jsonable, fullPath);
         }
         
         /// <summary>
         /// Save a variable into json file to the given directory.
         /// </summary>
-        /// <param name="variable">Variable to save.</param>
+        /// <param name="jsonable">Variable to save.</param>
         /// <param name="directory">Path to a directory where the json file would exist</param>
         /// <param name="filename">Name of the json file</param>
-        public static void SaveToJson(this IVariable variable, string directory, string filename)
+        public static void SaveToJson(this IJsonable jsonable, string directory, string filename)
         {
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
             var fn = filename.Split('.').Length < 2 ? filename + DefaultExtension : filename;
             var fullPath = Path.Combine(directory, fn);
-            SaveToJson(variable, fullPath);
+            SaveToJson(jsonable, fullPath);
         }
         
         /// <summary>
         /// Save a variable into json file with custom extension into the given directory.
         /// </summary>
-        /// <param name="variable">Variable to save.</param>
+        /// <param name="jsonable">Variable to save.</param>
         /// <param name="directory">Path to a directory where the json file would exist</param>
         /// <param name="filename">Name of the json file</param>
         /// <param name="extension">Custom extension of the json file</param>
         /// <typeparam name="T">Data type to save. Must be serializable.</typeparam>
-        public static void SaveToJson<T>(this IVariable<T> variable, string directory, string filename, string extension)
+        public static void SaveToJson<T>(this IJsonable<T> jsonable, string directory, string filename, string extension)
         {
             var ext = extension[0] == '.' ? extension : "." + extension;
             var filenameExt = $"{filename}{ext}";
-            SaveToJson(variable, directory, filenameExt);
+            SaveToJson(jsonable, directory, filenameExt);
         }
 
         /// <summary>
         /// Save a variable into json file with custom extension into the given directory.
         /// </summary>
-        /// <param name="variable">Variable to save.</param>
+        /// <param name="jsonable">Variable to save.</param>
         /// <param name="directory">Path to a directory where the json file would exist</param>
         /// <param name="filename">Name of the json file</param>
         /// <param name="extension">Custom extension of the json file</param>
-        public static void SaveToJson(this IVariable variable, string directory, string filename, string extension)
+        public static void SaveToJson(this IJsonable jsonable, string directory, string filename, string extension)
         {
             var ext = extension[0] == '.' ? extension : "." + extension;
             var filenameExt = $"{filename}{ext}";
-            SaveToJson(variable, directory, filenameExt);
+            SaveToJson(jsonable, directory, filenameExt);
         }
         
         /// <summary>
@@ -368,11 +386,11 @@ namespace Kadinche.Kassets
         /// <summary>
         /// Check whether a json file exist in a directory.
         /// </summary>
-        /// <param name="variable"></param>
+        /// <param name="jsonable"></param>
         /// <param name="directory">Path to a directory where the json file would exist</param>
         /// /// <param name="filename">Name of the json file</param>
         /// <returns></returns>
-        public static bool IsJsonFileExist(this IVariable variable, string directory, string filename)
+        public static bool IsJsonFileExist(this IJsonable jsonable, string directory, string filename)
         {
             return IsJsonFileExist(directory, filename);
         }
@@ -380,11 +398,11 @@ namespace Kadinche.Kassets
         /// <summary>
         /// Check whether a json file exist.
         /// </summary>
-        /// <param name="variable"></param>
+        /// <param name="jsonable"></param>
         /// <returns></returns>
-        public static bool IsJsonFileExist(this IVariable variable)
+        public static bool IsJsonFileExist(this IJsonable jsonable)
         {
-            return variable is ScriptableObject so && IsJsonFileExist(DefaultPath, so.name);
+            return jsonable is ScriptableObject so && IsJsonFileExist(DefaultPath, so.name);
         }
 
         [Serializable]
