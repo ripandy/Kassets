@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Kadinche.Kassets.CommandSystem
 {
-    public abstract class CommandCore : KassetsCore, ICommand
+    public abstract class CommandCore : KassetsCore
     {
         private CancellationTokenSource cts;
         protected CancellationToken DefaultToken
@@ -42,7 +42,7 @@ namespace Kadinche.Kassets.CommandSystem
         }
     }
 
-    public abstract class CommandCore<T> : CommandCore, ICommand<T>
+    public abstract class CommandCore<T> : CommandCore
     {
         public override void Execute() => Execute(default);
         public abstract void Execute(T param);

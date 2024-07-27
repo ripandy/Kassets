@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Kadinche.Kassets.Transaction
 {
-    public abstract partial class TransactionCore<TRequest, TResponse> : GameEvent<TRequest>, IGameEventHandler<TResponse>
+    public abstract partial class TransactionCore<TRequest, TResponse> : GameEvent<TRequest>
     {
         [SerializeField] protected TResponse responseValue;
         

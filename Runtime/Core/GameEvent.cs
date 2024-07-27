@@ -11,7 +11,7 @@ namespace Kadinche.Kassets.EventSystem
     /// Core Game Event System.
     /// </summary>
     [CreateAssetMenu(fileName = "GameEvent", menuName = MenuHelper.DefaultGameEventMenu + "GameEvent")]
-    public partial class GameEvent : KassetsCore, IGameEventRaiser, IGameEventHandler
+    public partial class GameEvent : KassetsCore
     {
     }
 
@@ -19,7 +19,7 @@ namespace Kadinche.Kassets.EventSystem
     /// Generic base class for event system with parameter.
     /// </summary>
     /// <typeparam name="T">Parameter type for the event system</typeparam>
-    public abstract partial class GameEvent<T> : GameEvent, IGameEventRaiser<T>, IGameEventHandler<T>
+    public abstract partial class GameEvent<T> : GameEvent
     {
         [SerializeField] protected T _value;
 
