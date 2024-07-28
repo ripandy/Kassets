@@ -6,9 +6,16 @@ namespace Kadinche.Kassets
     {
         public static void CancelAndDispose(this CancellationTokenSource source)
         {
-            if (source == null) return;
+            if (source == null)
+            {
+                return;
+            }
+            
             if (!source.IsCancellationRequested)
+            {
                 source.Cancel();
+            }
+            
             source.Dispose();
         }
     }

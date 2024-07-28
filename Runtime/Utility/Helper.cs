@@ -1,5 +1,3 @@
-using System;
-
 namespace Kadinche.Kassets
 {
     public static class MenuHelper

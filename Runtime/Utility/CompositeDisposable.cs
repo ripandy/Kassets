@@ -1,4 +1,4 @@
-#if !KASSETS_UNIRX && !KASSETS_R3
+#if !KASSETS_R3
 
 using System;
 using System.Collections.Generic;
@@ -21,8 +21,10 @@ namespace Kadinche.Kassets
         internal static void Dispose(this IList<IDisposable> disposables)
         {
             var i = 0;
-            while (i < disposables.Count) 
+            while (i < disposables.Count)
+            {
                 disposables[i++].Dispose();
+            }
 
             disposables.Clear();
         }
