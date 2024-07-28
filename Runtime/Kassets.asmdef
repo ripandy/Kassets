@@ -2,9 +2,6 @@
     "name": "Kassets",
     "rootNamespace": "",
     "references": [
-        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:5c01796d064528144a599661eaab93a6",
         "GUID:77221876cc6b8244180b96e320b1bcd4"
     ],
     "includePlatforms": [],
@@ -17,16 +14,6 @@
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [
-        {
-            "name": "com.neuecc.unirx",
-            "expression": "",
-            "define": "KASSETS_UNIRX"
-        },
-        {
-            "name": "com.cysharp.unitask",
-            "expression": "",
-            "define": "KASSETS_UNITASK"
-        },
         {
             "name": "com.cysharp.r3",
             "expression": "",

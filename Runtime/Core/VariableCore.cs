@@ -8,10 +8,10 @@ namespace Kadinche.Kassets.Variable
     /// Variable System Basics.
     /// </summary>
     /// <typeparam name="T">Type to use on variable system</typeparam>
-    public abstract partial class VariableCore<T> : GameEvent<T>, IVariable<T>
+    public abstract class VariableCore<T> : GameEvent<T>
     {
-        [Tooltip("Set how variable event behave.\nValue Assign: Raise when value is assigned regardless of value.\nValue Changed: Raise only when value is changed.")]
-        [SerializeField] protected VariableEventType variableEventType;
+        [Tooltip("Set how value event behave.\nValue Assign: Raise when value is assigned regardless of value.\nValue Changed: Raise only when value is changed.")]
+        [SerializeField] protected ValueEventType valueEventType;
 
         [Tooltip("If true will reset value when play mode end. Otherwise, keep runtime value. Due to shallow copying of class types, it is better avoid using autoResetValue on Class type.")]
         [SerializeField] protected bool autoResetValue;
@@ -24,17 +24,17 @@ namespace Kadinche.Kassets.Variable
 
         public override void Raise(T value)
         {
-            if (variableEventType == VariableEventType.ValueChange && IsValueChanged(value)) return;
+            if (valueEventType == ValueEventType.OnChange && IsValueEquals(value)) return;
             base.Raise(value);
         }
 
-        private bool IsValueChanged(T value) => _value == null && value == null ||
+        private bool IsValueEquals(T value) => _value == null && value == null ||
                                                 _value != null && value != null && _value.Equals(value);
         
         private T _initialValue;
         private string _initialValueJsonString; // Hack to handle shallow copy of class type. Better to avoid this on class type.
 
-        public virtual T InitialValue
+        public T InitialValue
         {
             get
             {

@@ -19,9 +19,9 @@ public class ExtendedScriptableObjectDrawer : PropertyDrawer
 {
 	private const int ButtonWidth = 66;
 
-	private static readonly List<string> _ignoreClassFullNames = new List<string>() { "TMPro.TMP_FontAsset" };
-	private static readonly List<string> _ignoreField = new List<string>() { "m_Script", "_value" };
-	private static readonly List<string> _instanceSettings = new List<string>() { "defaultSubscribeBehavior", "variableEventType", "autoResetValue" };
+	private static readonly List<string> _ignoreClassFullNames = new() { "TMPro.TMP_FontAsset" };
+	private static readonly List<string> _ignoreField = new() { "m_Script", "_value" };
+	private static readonly List<string> _instanceSettings = new() { "variableEventType", "autoResetValue" };
 	
 	public override float GetPropertyHeight (SerializedProperty property, GUIContent label) {
 		var totalHeight = EditorGUIUtility.singleLineHeight;

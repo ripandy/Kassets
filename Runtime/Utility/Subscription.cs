@@ -1,4 +1,4 @@
-﻿#if !KASSETS_UNIRX && !KASSETS_UNITASK && !KASSETS_R3
+﻿#if !KASSETS_R3
 
 using System;
 using System.Collections.Generic;
@@ -18,8 +18,11 @@ namespace Kadinche.Kassets
             _disposables = disposables;
         }
 
-        public void Invoke() => _action.Invoke();
-        
+        public void Invoke()
+        {
+            _action.Invoke();
+        }
+
         public void Dispose()
         {
             if (_disposables.Contains(this))
@@ -45,12 +48,20 @@ namespace Kadinche.Kassets
             _disposables = disposables;
         }
 
-        public void Invoke(T param) => _action.Invoke(param);
-        
+        public void Invoke(T param)
+        {
+            _action.Invoke(param);
+        }
+
         public void Dispose()
         {
             _action = null;
-            if (_disposables == null) return;
+            
+            if (_disposables == null)
+            {
+                return;
+            }
+            
             if (_disposables.Contains(this))
             {
                 _disposables.Remove(this);

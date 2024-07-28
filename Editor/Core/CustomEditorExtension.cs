@@ -10,14 +10,21 @@ namespace Kadinche.Kassets
             property = property.Copy();
             var nextElement = property.Copy();
             if (!nextElement.NextVisible(false))
+            {
                 nextElement = null;
+            }
 
-            if (!property.NextVisible(true)) yield break;
+            if (!property.NextVisible(true))
+            {
+                yield break;
+            }
 
             do
             {
                 if (SerializedProperty.EqualContents(property, nextElement))
+                {
                     yield break;
+                }
 
                 yield return property;
             } while (property.NextVisible(false));
