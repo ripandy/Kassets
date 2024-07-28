@@ -1,16 +1,11 @@
 ﻿using System;
 using System.IO;
+using Kadinche.Kassets.Variable;
 using UnityEngine;
 
 namespace Kadinche.Kassets
 {
-    public interface IJsonable { }
-    public interface IJsonable<T> : IJsonable
-    {
-        T Value { get; set; }
-    }
-    
-    public static class KassetsJsonExtension
+    public static class JsonableExtension
     {
         
 #if UNITY_EDITOR
@@ -20,22 +15,6 @@ namespace Kadinche.Kassets
 #endif
         
         private const string DefaultExtension = ".json";
-        
-        /// <summary>
-        /// Load variable from json string
-        /// </summary>
-        /// <param name="jsonable"></param>
-        /// <param name="jsonString"></param>
-        /// <typeparam name="T"></typeparam>
-        public static void FromJsonString<T>(this IJsonable<T> jsonable, string jsonString)
-        {
-            var simpleType = typeof(T).IsSimpleType();
-            
-            if (simpleType)
-                jsonable.Value = JsonUtility.FromJson<JsonableWrapper<T>>(jsonString).value;
-            else
-                jsonable.Value = JsonUtility.FromJson<T>(jsonString);
-        }
         
         /// <summary>
         /// Load variable from json string. Note that this uses Reflection.
@@ -78,23 +57,6 @@ namespace Kadinche.Kassets
             propertyInfo?.SetValue(jsonable, value);
         }
         
-        /// <summary>
-        /// Convert variable to json string
-        /// </summary>
-        /// <param name="jsonable"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static string ToJsonString<T>(this IJsonable<T> jsonable)
-        {
-            var simpleType = typeof(T).IsSimpleType();
-            
-            var jsonString = simpleType ?
-                JsonUtility.ToJson(new JsonableWrapper<T>(jsonable.Value), Application.isEditor) :
-                JsonUtility.ToJson(jsonable.Value, Application.isEditor);
-
-            return jsonString;
-        }
-
         /// <summary>
         /// Convert variable to json string. Note that this uses Reflection.
         /// </summary>
@@ -143,7 +105,7 @@ namespace Kadinche.Kassets
         {
             if (!File.Exists(fullpath)) return;
             var jsonString = File.ReadAllText(fullpath);
-            FromJsonString(jsonable, jsonString);
+            jsonable.FromJsonString(jsonString);
         }
         
         /// <summary>
@@ -155,7 +117,7 @@ namespace Kadinche.Kassets
         {
             if (!File.Exists(fullpath)) return;
             var jsonString = File.ReadAllText(fullpath);
-            FromJsonString(jsonable, jsonString);
+            jsonable.FromJsonString(jsonString);
         }
         
         /// <summary>
@@ -284,7 +246,7 @@ namespace Kadinche.Kassets
         /// <typeparam name="T">Data type to save. Must be serializable.</typeparam>
         public static void SaveToJson<T>(this IJsonable<T> jsonable, string fullPath)
         {
-            var jsonString = ToJsonString(jsonable);
+            var jsonString = jsonable.ToJsonString();
             File.WriteAllText(fullPath, jsonString);
         }
         
@@ -295,7 +257,7 @@ namespace Kadinche.Kassets
         /// <param name="fullPath">Path to a directory where the json file would exist. Path must include the json filename and extension.</param>
         public static void SaveToJson(this IJsonable jsonable, string fullPath)
         {
-            var jsonString = ToJsonString(jsonable);
+            var jsonString = jsonable.ToJsonString();
             File.WriteAllText(fullPath, jsonString);
         }
 
@@ -403,13 +365,6 @@ namespace Kadinche.Kassets
         public static bool IsJsonFileExist(this IJsonable jsonable)
         {
             return jsonable is ScriptableObject so && IsJsonFileExist(DefaultPath, so.name);
-        }
-
-        [Serializable]
-        public struct JsonableWrapper<T>
-        {
-            public T value;
-            public JsonableWrapper(T value) => this.value = value;
         }
     }
 }
