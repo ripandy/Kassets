@@ -1,5 +1,3 @@
-using System;
-
 namespace Kadinche.Kassets
 {
     public static class MenuHelper
@@ -7,6 +5,7 @@ namespace Kadinche.Kassets
         public const string DefaultCommandMenu = "Kassets/Commands/";
         public const string DefaultGameEventMenu = "Kassets/Game Events/";
         public const string DefaultVariableMenu = "Kassets/Variables/";
+        public const string DefaultJsonableVariableMenu = "Kassets/Jsonable Variables/";
         public const string DefaultCollectionMenu = "Kassets/Collections/";
         public const string DefaultTransactionMenu = "Kassets/Transactions/";
         public const string DefaultObjectPoolMenu = "Kassets/Object Pools/";
@@ -15,7 +14,7 @@ namespace Kadinche.Kassets
     
     public enum ValueEventType
     {
-        ValueAssign,
-        ValueChange
+        OnAssign,
+        OnChange
     }
 }

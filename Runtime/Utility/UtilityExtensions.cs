@@ -12,16 +12,18 @@ namespace Kadinche.Kassets
         /// <see cref="http://stackoverflow.com/questions/2442534/how-to-test-if-type-is-primitive"/>
         public static bool IsSimpleType(this Type type)
         {
-            return
-                type.IsPrimitive ||
-                new Type[] { 
-                    typeof(String),
-                    typeof(Decimal),
-                    typeof(DateTime),
-                    typeof(DateTimeOffset),
-                    typeof(TimeSpan),
-                    typeof(Guid)
-                }.Contains(type);
+            return type.IsPrimitive || 
+                   OtherPrimitives.Contains(type);
         }
+
+        private static readonly Type[] OtherPrimitives =
+        {
+            typeof(String),
+            typeof(Decimal),
+            typeof(DateTime),
+            typeof(DateTimeOffset),
+            typeof(TimeSpan),
+            typeof(Guid)
+        };
     }
 }

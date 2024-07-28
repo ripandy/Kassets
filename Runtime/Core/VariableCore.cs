@@ -8,7 +8,7 @@ namespace Kadinche.Kassets.Variable
     /// Variable System Basics.
     /// </summary>
     /// <typeparam name="T">Type to use on variable system</typeparam>
-    public abstract partial class VariableCore<T> : GameEvent<T>, IVariable<T>
+    public abstract class VariableCore<T> : GameEvent<T>
     {
         [Tooltip("Set how value event behave.\nValue Assign: Raise when value is assigned regardless of value.\nValue Changed: Raise only when value is changed.")]
         [SerializeField] protected ValueEventType valueEventType;
@@ -24,7 +24,7 @@ namespace Kadinche.Kassets.Variable
 
         public override void Raise(T value)
         {
-            if (valueEventType == ValueEventType.ValueChange && IsValueEquals(value)) return;
+            if (valueEventType == ValueEventType.OnChange && IsValueEquals(value)) return;
             base.Raise(value);
         }
 

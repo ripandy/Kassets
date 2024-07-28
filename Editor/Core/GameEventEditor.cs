@@ -20,6 +20,8 @@ namespace Kadinche.Kassets.EventSystem
 
             if (target is not GameEvent gameEvent) return;
             
+            GUILayout.Space(15);
+            
             if (!GUILayout.Button("Raise")) return;
             
             gameEvent.Raise();
@@ -33,43 +35,29 @@ namespace Kadinche.Kassets.EventSystem
     public class TypedGameEventEditor : GameEventEditor
     {
         private readonly string[] _excludedProperties = { "m_Script", "_value" };
-        private readonly string[] _instanceSettings = { "valueEventType", "autoResetValue" };
-        private readonly string _instanceSettingsLabel = "Instance Settings";
-        private bool _showInstanceSettings;
-
+        protected virtual string[] ExcludedProperties => _excludedProperties; 
+        
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
             
+            DrawCustomProperties();
+            
+            AddCustomButtons();
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        protected virtual void DrawCustomProperties()
+        {
             using var value = serializedObject.FindProperty("_value");
             if (value.propertyType == SerializedPropertyType.Generic && !value.isArray)
                 foreach (var child in value.GetChildren()) 
                     EditorGUILayout.PropertyField(child, true);
             else
                 EditorGUILayout.PropertyField(value, true);
-
-            var toExclude = _excludedProperties.Concat(_instanceSettings).ToArray();
-            DrawPropertiesExcluding(serializedObject, toExclude);
-
-            _showInstanceSettings = EditorGUILayout.Foldout(_showInstanceSettings, _instanceSettingsLabel);
-
-            if (_showInstanceSettings)
-            {
-                EditorGUI.indentLevel++;
-                
-                foreach (var settingName in _instanceSettings)
-                {
-                    using var prop = serializedObject.FindProperty(settingName);
-                    if (prop == null) continue;
-                    EditorGUILayout.PropertyField(prop);
-                }
-                
-                EditorGUI.indentLevel--;
-            }
-
-            AddCustomButtons();
-
-            serializedObject.ApplyModifiedProperties();
+            
+            DrawPropertiesExcluding(serializedObject, ExcludedProperties);
         }
     }
 }
