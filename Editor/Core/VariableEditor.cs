@@ -10,7 +10,7 @@ namespace Kadinche.Kassets.Variable
         private bool _showJsonFileOperation;
         private readonly string _jsonOpLabel = "Json File Management";
         
-        private readonly string[] _jsonPathType = new[] { "Data Path", "Persistent Data Path", "Custom" };
+        private readonly string[] _jsonPathType = { "Data Path", "Persistent Data Path", "Custom" };
         private int _selectedType;
         private bool _defaultFilename = true;
         private string _jsonPath;
@@ -23,7 +23,11 @@ namespace Kadinche.Kassets.Variable
 
         protected override void AddCustomButtons()
         {
-            if (!(target is IVariable variable)) return;
+            if (target is not IVariable variable)
+            {
+                base.AddCustomButtons();
+                return;
+            }
 
             GUI.enabled = true;
             
@@ -33,7 +37,8 @@ namespace Kadinche.Kassets.Variable
             {
                 EditorGUI.indentLevel++;
 
-                _selectedType = EditorGUILayout.Popup(
+                _selectedType = EditorGUILayout.Popup
+                (
                     label: new GUIContent("Json Path Type"),
                     selectedIndex: _selectedType,
                     displayedOptions: _jsonPathType
@@ -46,13 +51,15 @@ namespace Kadinche.Kassets.Variable
                     _ => Application.dataPath
                 };
                 
+                //====================================================================================================
+                
                 EditorGUILayout.BeginHorizontal();
                 
                 GUILayout.Space(EditorGUI.indentLevel * 15);
-                
                 GUILayout.Label("File Name", GUILayout.ExpandWidth(false));
                 
                 GUI.enabled = !_defaultFilename;
+                
                 _filename = EditorGUILayout.TextField(_filename);
                 
                 GUI.enabled = true;
@@ -61,10 +68,14 @@ namespace Kadinche.Kassets.Variable
                 GUILayout.Label("Default", GUILayout.ExpandWidth(false));
                 
                 if (_defaultFilename)
+                {
                     _filename = $"{target.name}.json";
+                }
                 
                 EditorGUILayout.EndHorizontal();
-
+                
+                //====================================================================================================
+                
                 EditorGUILayout.BeginHorizontal();
 
                 GUILayout.Space(EditorGUI.indentLevel * 15);
@@ -95,6 +106,8 @@ namespace Kadinche.Kassets.Variable
                 }
 
                 GUILayout.EndHorizontal();
+                
+                //====================================================================================================
 
                 EditorGUI.indentLevel--;
             }

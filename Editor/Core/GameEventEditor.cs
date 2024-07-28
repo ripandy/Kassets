@@ -18,13 +18,13 @@ namespace Kadinche.Kassets.EventSystem
         {
             GUI.enabled = Application.isPlaying;
 
-            if (!(target is GameEvent gameEvent)) return;
+            if (target is not GameEvent gameEvent) return;
             
-            if (GUILayout.Button("Raise"))
-            {
-                gameEvent.Raise();
-                Debug.Log($"{target.name} event raised.");
-            }
+            if (!GUILayout.Button("Raise")) return;
+            
+            gameEvent.Raise();
+            
+            Debug.Log($"{target.name} event raised.");
         }
     }
     
@@ -33,7 +33,7 @@ namespace Kadinche.Kassets.EventSystem
     public class TypedGameEventEditor : GameEventEditor
     {
         private readonly string[] _excludedProperties = { "m_Script", "_value" };
-        private readonly string[] _instanceSettings = { "defaultSubscribeBehavior", "variableEventType", "autoResetValue" };
+        private readonly string[] _instanceSettings = { "valueEventType", "autoResetValue" };
         private readonly string _instanceSettingsLabel = "Instance Settings";
         private bool _showInstanceSettings;
 
