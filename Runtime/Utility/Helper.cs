@@ -14,7 +14,7 @@ namespace Kadinche.Kassets
     
     public enum ValueEventType
     {
-        ValueAssign,
-        ValueChange
+        OnAssign,
+        OnChange
     }
 }

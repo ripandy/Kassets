@@ -24,7 +24,7 @@ namespace Kadinche.Kassets.Variable
 
         public override void Raise(T value)
         {
-            if (valueEventType == ValueEventType.ValueChange && IsValueEquals(value)) return;
+            if (valueEventType == ValueEventType.OnChange && IsValueEquals(value)) return;
             base.Raise(value);
         }
 

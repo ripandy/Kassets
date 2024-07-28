@@ -117,7 +117,7 @@ namespace Kadinche.Kassets.Collection
 
         private partial void RaiseValueAt(int index, T value)
         {
-            if (valueEventType == ValueEventType.ValueChange && list[index].Equals(value))
+            if (valueEventType == ValueEventType.OnChange && list[index].Equals(value))
             {
                 return;
             }
@@ -203,7 +203,7 @@ namespace Kadinche.Kassets.Collection
 
         private partial void RaiseValue(TKey key, TValue value)
         {
-            if (valueEventType == ValueEventType.ValueChange && _dictionary.TryGetValue(key, out var value2) && value2.Equals(value))
+            if (valueEventType == ValueEventType.OnChange && _dictionary.TryGetValue(key, out var value2) && value2.Equals(value))
             {
                 return;
             }
