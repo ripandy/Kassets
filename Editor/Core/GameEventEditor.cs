@@ -39,9 +39,8 @@ namespace Kadinche.Kassets.EventSystem
     [CanEditMultipleObjects]
     public class TypedGameEventEditor : GameEventEditor
     {
-        private readonly string[] _excludedProperties = { "m_Script", "_value" };
-        protected virtual string[] ExcludedProperties => _excludedProperties; 
-        
+        protected virtual string[] ExcludedProperties { get; } = { "m_Script", "_value" };
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
