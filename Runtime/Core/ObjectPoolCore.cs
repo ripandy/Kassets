@@ -24,13 +24,13 @@ namespace Kadinche.Kassets
         [SerializeField] private bool collectionChecks = true;
         [SerializeField] private int maxPoolSize = 10;
 
-        private IObjectPool<T> _pool;
+        private IObjectPool<T> pool;
 
         public IObjectPool<T> Pool
         {
             get
             {
-                return _pool ??= poolType switch
+                return pool ??= poolType switch
                 {
                     PoolType.Stack => new ObjectPool<T>
                     (
@@ -51,20 +51,20 @@ namespace Kadinche.Kassets
                         collectionChecks, 
                         maxPoolSize
                     ),
-                    _ => _pool
+                    _ => pool
                 };
             }
         }
 
         public void OnValidate()
         {
-            if (poolType == PoolType.LinkedList && _pool is ObjectPool<T> ||
-                poolType == PoolType.Stack && _pool is LinkedPool<T>)
+            if (poolType == PoolType.LinkedList && pool is ObjectPool<T> ||
+                poolType == PoolType.Stack && pool is LinkedPool<T>)
             {
                 Dispose();
             }
             
-            if (_pool == null) _ = Pool;
+            if (pool == null) _ = Pool;
         }
 
         protected abstract T CreatePooledItem();
@@ -80,8 +80,8 @@ namespace Kadinche.Kassets
         
         public override void Dispose()
         {
-            _pool?.Clear();
-            _pool = null;
+            pool?.Clear();
+            pool = null;
         }
     }
 }

@@ -16,45 +16,45 @@ namespace Kadinche.Kassets.Collection
         [Tooltip("If true will reset value(s) when play mode end. Otherwise, keep runtime value. Due to shallow copying of class types, it is better avoid using autoResetValue on Class type.")]
         [SerializeField] protected bool autoResetValue;
         
-        private readonly List<T> _initialValue = new();
-        private readonly object _syncRoot = new();
-        private T _lastRemoved;
+        private readonly List<T> initialValue = new();
+        private readonly object syncRoot = new();
+        private T lastRemoved;
         
         public T this[int index]
         {
             get
             {
-                lock (_syncRoot)
+                lock (syncRoot)
                 {
                     return list[index];
                 }
             }
             set
             {
-                lock (_syncRoot)
+                lock (syncRoot)
                 {
                     list[index] = value;
                     RaiseValueAt(index, value);
                 }
             }
         }
-        
-        protected List<T> InitialValue
+
+        private List<T> InitialValue
         {
             get
             {
-                lock (_syncRoot)
+                lock (syncRoot)
                 {
-                    return _initialValue;
+                    return initialValue;
                 }
             }
             set
             {
-                lock (_syncRoot)
+                lock (syncRoot)
                 {
-                    _initialValue.Clear();
+                    initialValue.Clear();
                     if (value == null) return;
-                    _initialValue.AddRange(value);
+                    initialValue.AddRange(value);
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace Kadinche.Kassets.Collection
         {
             get
             {
-                lock (_syncRoot)
+                lock (syncRoot)
                 {
                     return list.Count;
                 }
@@ -74,7 +74,7 @@ namespace Kadinche.Kassets.Collection
 
         public virtual void Add(T item)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 var index = list.Count;
                 list.Add(item);
@@ -91,7 +91,7 @@ namespace Kadinche.Kassets.Collection
 
         public virtual void AddRange(T[] items)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 foreach (var item in items)
                 {
@@ -106,7 +106,7 @@ namespace Kadinche.Kassets.Collection
         
         public virtual void Clear()
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 ClearValueSubscriptions();
                 list.Clear();
@@ -117,7 +117,7 @@ namespace Kadinche.Kassets.Collection
         
         public bool Contains(T item)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 return list.Contains(item);
             }
@@ -125,7 +125,7 @@ namespace Kadinche.Kassets.Collection
 
         public virtual void Copy(IEnumerable<T> others)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 list.Clear();
                 list.AddRange(others);
@@ -134,7 +134,7 @@ namespace Kadinche.Kassets.Collection
         
         public void CopyTo(T[] array, int arrayIndex)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 list.CopyTo(array, arrayIndex);
             }
@@ -142,7 +142,7 @@ namespace Kadinche.Kassets.Collection
         
         public IEnumerator<T> GetEnumerator()
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 foreach (var item in list)
                 {
@@ -158,7 +158,7 @@ namespace Kadinche.Kassets.Collection
         
         public void ForEach(Action<T> action)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 foreach (var item in list)
                 {
@@ -169,7 +169,7 @@ namespace Kadinche.Kassets.Collection
         
         public int IndexOf(T item)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 return list.IndexOf(item);
             }
@@ -177,7 +177,7 @@ namespace Kadinche.Kassets.Collection
         
         public virtual void Insert(int index, T item)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 list.Insert(index, item);
                 IncrementValueSubscriptions(index);
@@ -188,7 +188,7 @@ namespace Kadinche.Kassets.Collection
         
         public void InsertRange(int index, T[] items)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 for (var i = 0; i < items.Length; i++)
                 {
@@ -209,7 +209,7 @@ namespace Kadinche.Kassets.Collection
         
         public virtual bool Remove(T item)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 var index = list.IndexOf(item);
                 if (index < 0)
@@ -217,9 +217,9 @@ namespace Kadinche.Kassets.Collection
                     return false;
                 }
                 
-                _lastRemoved = list[index];
+                lastRemoved = list[index];
                 list.RemoveAt(index);
-                RaiseOnRemove(_lastRemoved);
+                RaiseOnRemove(lastRemoved);
                 RemoveValueSubscription(index);
                 RaiseCount();
                 return true;
@@ -228,11 +228,11 @@ namespace Kadinche.Kassets.Collection
 
         public virtual void RemoveAt(int index)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
-                _lastRemoved = list[index];
+                lastRemoved = list[index];
                 list.RemoveAt(index);
-                RaiseOnRemove(_lastRemoved);
+                RaiseOnRemove(lastRemoved);
                 RemoveValueSubscription(index);
                 RaiseCount();
             }
@@ -240,7 +240,7 @@ namespace Kadinche.Kassets.Collection
 
         public virtual void Move(int oldIndex, int newIndex)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 var removedItem = list[oldIndex];
                 list.RemoveAt(oldIndex);

@@ -44,8 +44,8 @@ namespace Kadinche.Kassets
         public abstract void Dispose();
     
 #if UNITY_EDITOR
-        private bool IsDomainReloadDisabled => EditorSettings.enterPlayModeOptionsEnabled &&
-                                               EditorSettings.enterPlayModeOptions.HasFlag(EnterPlayModeOptions.DisableDomainReload);
+        private static bool IsDomainReloadDisabled => EditorSettings.enterPlayModeOptionsEnabled &&
+                                                      EditorSettings.enterPlayModeOptions.HasFlag(EnterPlayModeOptions.DisableDomainReload);
         
         private void OnPlayModeStateChanged(PlayModeStateChange playModeState)
         {

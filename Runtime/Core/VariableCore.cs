@@ -18,21 +18,21 @@ namespace Kadinche.Kassets.Variable
         
         public virtual T Value
         {
-            get => _value;
+            get => value;
             set => Raise(value);
         }
 
-        public override void Raise(T value)
+        public override void Raise(T valueToRaise)
         {
-            if (valueEventType == ValueEventType.OnChange && IsValueEquals(value)) return;
-            base.Raise(value);
+            if (valueEventType == ValueEventType.OnChange && IsValueEquals(valueToRaise)) return;
+            base.Raise(valueToRaise);
         }
 
-        private bool IsValueEquals(T value) => _value == null && value == null ||
-                                                _value != null && value != null && _value.Equals(value);
+        private bool IsValueEquals(T valueToCompare) => value == null && valueToCompare == null || 
+                                                        value != null && valueToCompare != null && value.Equals(valueToCompare);
         
-        private T _initialValue;
-        private string _initialValueJsonString; // Hack to handle shallow copy of class type. Better to avoid this on class type.
+        private T initialValue;
+        private string initialValueJsonString; // Hack to handle shallow copy of class type. Better to avoid this on class type.
 
         public T InitialValue
         {
@@ -42,14 +42,14 @@ namespace Kadinche.Kassets.Variable
                 {
                     try
                     {
-                        _initialValue = JsonUtility.FromJson<T>(_initialValueJsonString);
+                        initialValue = JsonUtility.FromJson<T>(initialValueJsonString);
                     }
                     catch (ArgumentException)
                     {
                         // TODO : actually check for Engine Types or "Fix" the hack.
                     }
                 }
-                return _initialValue;
+                return initialValue;
             }
             protected set
             {
@@ -57,14 +57,14 @@ namespace Kadinche.Kassets.Variable
                 {
                     try
                     {
-                        _initialValueJsonString = JsonUtility.ToJson(value);
+                        initialValueJsonString = JsonUtility.ToJson(value);
                     }
                     catch (ArgumentException)
                     {
                         // TODO : actually check for Engine Types or "Fix" the hack.
                     }
                 }
-                _initialValue = value;
+                initialValue = value;
             }
         }
 
@@ -75,7 +75,11 @@ namespace Kadinche.Kassets.Variable
 
         protected override void ResetInternal()
         {
-            if (!autoResetValue) return;
+            if (!autoResetValue)
+            {
+                return;
+            }
+            
             ResetValue();
         }
 

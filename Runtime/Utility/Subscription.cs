@@ -2,72 +2,99 @@
 
 using System;
 using System.Collections.Generic;
+using Kadinche.Kassets.Transaction;
 
 namespace Kadinche.Kassets
 {
-    internal class Subscription : IDisposable
+    internal struct Subscription : IDisposable
     {
-        private Action _action;
-        private IList<IDisposable> _disposables;
+        private Action action;
+        private IList<IDisposable> disposables;
         
         public Subscription(
             Action action,
             IList<IDisposable> disposables)
         {
-            _action = action;
-            _disposables = disposables;
+            this.action = action;
+            this.disposables = disposables;
         }
 
         public void Invoke()
         {
-            _action.Invoke();
+            action.Invoke();
         }
 
         public void Dispose()
         {
-            if (_disposables.Contains(this))
+            if (disposables.Contains(this))
             {
-                _disposables.Remove(this);
+                disposables.Remove(this);
             }
             
-            _action = null;
-            _disposables = null;
+            action = null;
+            disposables = null;
         }
     }
     
-    internal class Subscription<T> : IDisposable
+    internal struct Subscription<T> : IDisposable
     {
-        private Action<T> _action;
-        private IList<IDisposable> _disposables;
+        private Action<T> action;
+        private IList<IDisposable> disposables;
         
         public Subscription(
             Action<T> action,
             IList<IDisposable> disposables)
         {
-            _action = action;
-            _disposables = disposables;
+            this.action = action;
+            this.disposables = disposables;
         }
 
         public void Invoke(T param)
         {
-            _action.Invoke(param);
+            action.Invoke(param);
         }
 
         public void Dispose()
         {
-            _action = null;
+            action = null;
             
-            if (_disposables == null)
+            if (disposables == null)
             {
                 return;
             }
             
-            if (_disposables.Contains(this))
+            if (disposables.Contains(this))
             {
-                _disposables.Remove(this);
+                disposables.Remove(this);
             }
 
-            _disposables = null;
+            disposables = null;
+        }
+    }
+    
+    internal struct ResponseSubscription<TRequest, TResponse> : IDisposable
+    {
+        private TransactionCore<TRequest, TResponse> source;
+        private Func<TRequest, TResponse> responseFunc;
+        
+        public ResponseSubscription(
+            TransactionCore<TRequest, TResponse> source,
+            Func<TRequest, TResponse> responseFunc)
+        {
+            this.source = source;
+            this.responseFunc = responseFunc;
+        }
+
+        public TResponse Invoke(TRequest param)
+        {
+            return responseFunc.Invoke(param);
+        }
+
+        public void Dispose()
+        {
+            responseFunc = null;
+            source.responseSubscription = null;
+            source = null;
         }
     }
 }

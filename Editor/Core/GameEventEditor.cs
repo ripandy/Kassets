@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,11 +17,17 @@ namespace Kadinche.Kassets.EventSystem
         {
             GUI.enabled = Application.isPlaying;
 
-            if (target is not GameEvent gameEvent) return;
+            if (target is not GameEvent gameEvent)
+            {
+                return;
+            }
             
             GUILayout.Space(15);
             
-            if (!GUILayout.Button("Raise")) return;
+            if (!GUILayout.Button("Raise"))
+            {
+                return;
+            }
             
             gameEvent.Raise();
             
@@ -34,9 +39,8 @@ namespace Kadinche.Kassets.EventSystem
     [CanEditMultipleObjects]
     public class TypedGameEventEditor : GameEventEditor
     {
-        private readonly string[] _excludedProperties = { "m_Script", "_value" };
-        protected virtual string[] ExcludedProperties => _excludedProperties; 
-        
+        protected virtual string[] ExcludedProperties { get; } = { "m_Script", "value" };
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -50,13 +54,19 @@ namespace Kadinche.Kassets.EventSystem
 
         protected virtual void DrawCustomProperties()
         {
-            using var value = serializedObject.FindProperty("_value");
+            using var value = serializedObject.FindProperty("value");
             if (value.propertyType == SerializedPropertyType.Generic && !value.isArray)
-                foreach (var child in value.GetChildren()) 
+            {
+                foreach (var child in value.GetChildren())
+                {
                     EditorGUILayout.PropertyField(child, true);
+                }
+            }
             else
+            {
                 EditorGUILayout.PropertyField(value, true);
-            
+            }
+
             DrawPropertiesExcluding(serializedObject, ExcludedProperties);
         }
     }

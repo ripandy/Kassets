@@ -14,7 +14,9 @@ namespace Kadinche.Kassets.CommandSystem
 
             var e = (CommandCore) target;
             if (GUILayout.Button("Execute"))
+            {
                 e.Execute();
+            }
         }
     }
 }
