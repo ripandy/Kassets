@@ -7,7 +7,7 @@ namespace Kadinche.Kassets.Variable
     /// Jsonable Variable. A variable that can be serialized to json.
     /// </summary>
     /// <typeparam name="T">Type to use on variable system</typeparam>
-    public abstract class JsonableVariable<T> : VariableCore<T>, IJsonable<T>
+    public abstract class JsonableVariable<T> : VariableCore<T>, IJsonable
     {
         /// <summary>
         /// Load variable from json string
@@ -17,7 +17,7 @@ namespace Kadinche.Kassets.Variable
         {
             var simpleType = Type.IsSimpleType();
             Value = simpleType
-                ? JsonUtility.FromJson<JsonableWrapper<T>>(jsonString).Value
+                ? JsonUtility.FromJson<JsonableWrapper<T>>(jsonString).value
                 : JsonUtility.FromJson<T>(jsonString);
         }
 
@@ -33,23 +33,20 @@ namespace Kadinche.Kassets.Variable
                 JsonUtility.ToJson(Value, Application.isEditor);
         }
     }
-    
-    public interface IJsonable { }
-    public interface IJsonable<T> : IJsonable
+
+    public interface IJsonable
     {
-        T Value { get; set; }
-        
         void FromJsonString(string jsonString);
         string ToJsonString();
     }
     
     [Serializable]
-    public readonly struct JsonableWrapper<T>
+    public struct JsonableWrapper<T>
     {
-        public readonly T Value;
+        public T value;
         public JsonableWrapper(T value)
         {
-            Value = value;
+            this.value = value;
         }
     }
 }
