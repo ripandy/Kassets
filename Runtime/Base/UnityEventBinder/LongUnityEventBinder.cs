@@ -1,6 +1,6 @@
 namespace Kadinche.Kassets.EventSystem
 {
-    public class LongUnityEventBinder : UnityEventBinder<long>
+    public sealed class LongUnityEventBinder : UnityEventBinder<long>
     {
     }
 }

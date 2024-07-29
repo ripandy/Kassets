@@ -1,6 +1,6 @@
 namespace Kadinche.Kassets.EventSystem
 {
-    public class ByteUnityEventBinder : UnityEventBinder<byte>
+    public sealed class ByteUnityEventBinder : UnityEventBinder<byte>
     {
     }
 }

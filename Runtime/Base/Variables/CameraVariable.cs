@@ -3,17 +3,17 @@ using UnityEngine;
 namespace Kadinche.Kassets.Variable
 {
     [CreateAssetMenu(fileName = "CameraVariable", menuName = MenuHelper.DefaultVariableMenu + "Camera")]
-    public class CameraVariable : VariableCore<Camera>
+    public sealed class CameraVariable : VariableCore<Camera>
     {
-        [SerializeField] private CameraFallback _fallbackType;
+        [SerializeField] private CameraFallback fallbackType;
 
         public override Camera Value
         {
             get
             {
-                if (base.Value == null && _fallbackType != CameraFallback.Null)
+                if (base.Value == null && fallbackType != CameraFallback.Null)
                 {
-                    switch (_fallbackType)
+                    switch (fallbackType)
                     {
                         case CameraFallback.Main:
                             base.Value = Camera.main;

@@ -3,7 +3,7 @@
 namespace Kadinche.Kassets.EventSystem
 {
     [CreateAssetMenu(fileName = "QuaternionEvent", menuName = MenuHelper.DefaultGameEventMenu + "QuaternionEvent")]
-    public class QuaternionGameEvent : GameEvent<Quaternion>
+    public sealed class QuaternionGameEvent : GameEvent<Quaternion>
     {
     }
 }
