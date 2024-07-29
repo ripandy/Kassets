@@ -10,8 +10,8 @@ namespace Kadinche.Kassets.Transaction
     {
         [SerializeField] protected TResponse responseValue;
         
-        private readonly Queue<(TRequest, Action<TResponse>)> _requests = new();
-        private readonly object _syncRoot = new();
+        private readonly Queue<(TRequest, Action<TResponse>)> requests = new();
+        private readonly object syncRoot = new();
 
         internal IDisposable responseSubscription;
         
@@ -24,9 +24,9 @@ namespace Kadinche.Kassets.Transaction
 
         public void Request(TRequest request, Action<TResponse> onResponse)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
-                _requests.Enqueue(new ValueTuple<TRequest, Action<TResponse>>(request, onResponse));
+                requests.Enqueue(new ValueTuple<TRequest, Action<TResponse>>(request, onResponse));
                 Raise(request);
                 TryRespond();
             }
@@ -34,11 +34,11 @@ namespace Kadinche.Kassets.Transaction
         
         public void Response(Func<TRequest, TResponse> responseFunc)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
-                if (!_requests.Any()) return;
+                if (!requests.Any()) return;
 
-                var (request, onResponse) = _requests.Dequeue();
+                var (request, onResponse) = requests.Dequeue();
                 var response = responseFunc.Invoke(request);
                 onResponse.Invoke(response);
                 RaiseResponse(response);
@@ -47,7 +47,7 @@ namespace Kadinche.Kassets.Transaction
         
         public IDisposable RegisterResponse(Func<TRequest, TResponse> responseFunc, bool overrideResponse = true)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
                 if (!overrideResponse && responseSubscription != null)
                 {
@@ -58,7 +58,7 @@ namespace Kadinche.Kassets.Transaction
                 responseSubscription?.Dispose();
                 responseSubscription ??= HandleSubscribe(responseFunc);
 
-                while (_requests.Count > 0)
+                while (requests.Count > 0)
                 {
                     TryRespond();
                 }
@@ -87,7 +87,7 @@ namespace Kadinche.Kassets.Transaction
         
         // List of Partial methods. Implemented in each respective integrated Library.
         private partial void TryRespond();
-        private partial void RaiseResponse(TResponse param);
+        private partial void RaiseResponse(TResponse response);
         private partial IDisposable HandleSubscribe(Func<TRequest, TResponse> responseFunc);
         private partial IDisposable HandleSubscribeToResponse(Action action);
         private partial IDisposable HandleSubscribeToResponse(Action<TResponse> action);

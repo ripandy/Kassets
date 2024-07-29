@@ -20,23 +20,23 @@ namespace Kadinche.Kassets.EventSystem
             }
         }
         
-        private readonly Subject<object> _subject = new();
+        private readonly Subject<object> subject = new();
         
         /// <summary>
         /// Raise the event.
         /// </summary>
-        public virtual void Raise() => _subject.OnNext(this);
-        public IDisposable Subscribe(Action action) => _subject.Subscribe(_ => action.Invoke());
+        public virtual void Raise() => subject.OnNext(this);
+        public IDisposable Subscribe(Action action) => subject.Subscribe(_ => action.Invoke());
         
         public async ValueTask EventAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            await _subject.WaitAsync(cancellationToken: linkedTokenSource.Token);
+            await subject.WaitAsync(cancellationToken: linkedTokenSource.Token);
         }
 
         public override void Dispose()
         {
-            _subject.Dispose();
+            subject.Dispose();
             cts?.CancelAndDispose();
             cts = null;
         }
@@ -44,34 +44,34 @@ namespace Kadinche.Kassets.EventSystem
 
     public abstract partial class GameEvent<T>
     {
-        private readonly Subject<T> _valueSubject = new();
+        private readonly Subject<T> valueSubject = new();
         
-        public Observable<T> AsObservable() => _valueSubject;
-        public IObservable<T> AsSystemObservable() => _valueSubject.AsSystemObservable();
-        public IAsyncEnumerable<T> ToAsyncEnumerable(CancellationToken cancellationToken = default) => _valueSubject.ToAsyncEnumerable(cancellationToken: cancellationToken);
+        public Observable<T> AsObservable() => valueSubject;
+        public IObservable<T> AsSystemObservable() => valueSubject.AsSystemObservable();
+        public IAsyncEnumerable<T> ToAsyncEnumerable(CancellationToken cancellationToken = default) => valueSubject.ToAsyncEnumerable(cancellationToken: cancellationToken);
     
         /// <summary>
         /// Raise the event with parameter.
         /// </summary>
-        /// /// <param name="param"></param>
-        public virtual void Raise(T param)
+        /// /// <param name="valueToRaise"></param>
+        public virtual void Raise(T valueToRaise)
         {
-            _value = param;
+            value = valueToRaise;
             base.Raise();
-            _valueSubject.OnNext(param);
+            valueSubject.OnNext(valueToRaise);
         }
 
-        public IDisposable Subscribe(Action<T> action) => _valueSubject.Subscribe(action);
+        public IDisposable Subscribe(Action<T> action) => valueSubject.Subscribe(action);
         
         public new async ValueTask<T> EventAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await _valueSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await valueSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public override void Dispose()
         {
-            _valueSubject.Dispose();
+            valueSubject.Dispose();
             base.Dispose();
         }
     }

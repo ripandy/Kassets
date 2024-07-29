@@ -20,23 +20,26 @@ namespace Kadinche.Kassets.Collection
             }
         }
 
-        private readonly Subject<T> _onAddSubject = new();
-        private readonly Subject<T> _onRemoveSubject = new();
-        private readonly Subject<object> _onClearSubject = new();
-        private readonly Subject<int> _countSubject = new();
-        private readonly Dictionary<int, Subject<T>> _valueSubjects = new();
+        private readonly Subject<T> onAddSubject = new();
+        private readonly Subject<T> onRemoveSubject = new();
+        private readonly Subject<object> onClearSubject = new();
+        private readonly Subject<int> countSubject = new();
+        private readonly Dictionary<int, Subject<T>> valueSubjects = new();
 
-        public Observable<T> OnAddObservable() => _onAddSubject;
-        public Observable<T> OnRemoveObservable() => _onRemoveSubject;
-        public Observable<object> OnClearObservable() => _onClearSubject;
-        public Observable<int> CountObservable() => _countSubject;
+        public Observable<T> OnAddObservable() => onAddSubject;
+        public Observable<T> OnRemoveObservable() => onRemoveSubject;
+        public Observable<object> OnClearObservable() => onClearSubject;
+        public Observable<int> CountObservable() => countSubject;
 
         public Observable<T> ValueAtObservable(int index)
         {
-            if (_valueSubjects.TryGetValue(index, out var elementSubject)) return elementSubject;
+            if (valueSubjects.TryGetValue(index, out var elementSubject))
+            {
+                return elementSubject;
+            }
             
             elementSubject = new Subject<T>();
-            _valueSubjects.Add(index, elementSubject);
+            valueSubjects.Add(index, elementSubject);
 
             return elementSubject;
         }
@@ -44,25 +47,25 @@ namespace Kadinche.Kassets.Collection
         public async ValueTask<T> OnAddAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await _onAddSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await onAddSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public async ValueTask<T> OnRemoveAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await _onRemoveSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await onRemoveSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public async ValueTask OnClearAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            await _onClearSubject.WaitAsync(cancellationToken: linkedTokenSource.Token);
+            await onClearSubject.WaitAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public async ValueTask<int> CountAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await _countSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await countSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public async ValueTask<T> ValueAtAsync(int index, CancellationToken cancellationToken = default)
@@ -74,14 +77,17 @@ namespace Kadinche.Kassets.Collection
 
     public abstract partial class Collection<TKey, TValue>
     {
-        private readonly Dictionary<TKey, Subject<TValue>> _valueSubjects = new();
+        private readonly Dictionary<TKey, Subject<TValue>> valueSubjects = new();
         
         public Observable<TValue> ValueAtObservable(TKey key)
         {
-            if (_valueSubjects.TryGetValue(key, out var elementSubject)) return elementSubject;
+            if (valueSubjects.TryGetValue(key, out var elementSubject))
+            {
+                return elementSubject;
+            }
             
             elementSubject = new Subject<TValue>();
-            _valueSubjects.Add(key, elementSubject);
+            valueSubjects.Add(key, elementSubject);
 
             return elementSubject;
         }
@@ -97,22 +103,22 @@ namespace Kadinche.Kassets.Collection
     {
         private partial void RaiseOnAdd(T addedValue)
         {
-            _onAddSubject.OnNext(addedValue);
+            onAddSubject.OnNext(addedValue);
         }
 
         private partial void RaiseOnRemove(T removedValue)
         {
-            _onRemoveSubject.OnNext(removedValue);
+            onRemoveSubject.OnNext(removedValue);
         }
 
         private partial void RaiseOnClear()
         {
-            _onClearSubject.OnNext(this);
+            onClearSubject.OnNext(this);
         }
 
         private partial void RaiseCount()
         {
-            _countSubject.OnNext(Count);
+            countSubject.OnNext(Count);
         }
 
         private partial void RaiseValueAt(int index, T value)
@@ -122,7 +128,7 @@ namespace Kadinche.Kassets.Collection
                 return;
             }
 
-            if (_valueSubjects.TryGetValue(index, out var subject))
+            if (valueSubjects.TryGetValue(index, out var subject))
             {
                 subject.OnNext(value);
             }
@@ -130,22 +136,22 @@ namespace Kadinche.Kassets.Collection
 
         public partial IDisposable SubscribeOnAdd(Action<T> action)
         {
-            return _onAddSubject.Subscribe(action);
+            return onAddSubject.Subscribe(action);
         }
 
         public partial IDisposable SubscribeOnRemove(Action<T> action)
         {
-            return _onRemoveSubject.Subscribe(action);
+            return onRemoveSubject.Subscribe(action);
         }
 
         public partial IDisposable SubscribeOnClear(Action action)
         {
-            return _onClearSubject.Subscribe(_ => action.Invoke());
+            return onClearSubject.Subscribe(_ => action.Invoke());
         }
         
         public partial IDisposable SubscribeToCount(Action<int> action)
         {
-            return _countSubject.Subscribe(action);
+            return countSubject.Subscribe(action);
         }
 
         public partial IDisposable SubscribeToValueAt(int index, Action<T> action)
@@ -157,37 +163,41 @@ namespace Kadinche.Kassets.Collection
         {
             for (var i = list.Count; i > index; i--)
             {
-                _valueSubjects.TryChangeKey(i - 1, i);
+                valueSubjects.TryChangeKey(i - 1, i);
             }
         }
         
         private partial void SwitchValueSubscription(int oldIndex, int newIndex)
         {
-            _valueSubjects.TryChangeKey(oldIndex, newIndex);
+            valueSubjects.TryChangeKey(oldIndex, newIndex);
         }
         
         private partial void ClearValueSubscriptions()
         {
-            foreach (var subject in _valueSubjects.Values)
+            foreach (var subject in valueSubjects.Values)
             {
                 subject.Dispose();
             }
-            _valueSubjects.Clear();
+            valueSubjects.Clear();
         }
         
         private partial void RemoveValueSubscription(int index)
         {
-            if (!_valueSubjects.TryGetValue(index, out var subject)) return;
+            if (!valueSubjects.TryGetValue(index, out var subject))
+            {
+                return;
+            }
+            
             subject.Dispose();
-            _valueSubjects.Remove(index);
+            valueSubjects.Remove(index);
         }
 
         private partial void DisposeSubscriptions()
         {
-            _onAddSubject.Dispose();
-            _onRemoveSubject.Dispose();
-            _onClearSubject.Dispose();
-            _countSubject.Dispose();
+            onAddSubject.Dispose();
+            onRemoveSubject.Dispose();
+            onClearSubject.Dispose();
+            countSubject.Dispose();
             ClearValueSubscriptions();
             cts?.CancelAndDispose();
             cts = null;
@@ -203,12 +213,12 @@ namespace Kadinche.Kassets.Collection
 
         private partial void RaiseValue(TKey key, TValue value)
         {
-            if (valueEventType == ValueEventType.OnChange && _dictionary.TryGetValue(key, out var value2) && value2.Equals(value))
+            if (valueEventType == ValueEventType.OnChange && dictionary.TryGetValue(key, out var value2) && value2.Equals(value))
             {
                 return;
             }
             
-            if (_valueSubjects.TryGetValue(key, out var subject))
+            if (valueSubjects.TryGetValue(key, out var subject))
             {
                 subject.OnNext(value);
             }
@@ -216,18 +226,23 @@ namespace Kadinche.Kassets.Collection
 
         private partial void ClearValueSubscriptions()
         {
-            foreach (var subject in _valueSubjects.Values)
+            foreach (var subject in valueSubjects.Values)
             {
                 subject.Dispose();
             }
-            _valueSubjects.Clear();
+            
+            valueSubjects.Clear();
         }
         
         private partial void RemoveValueSubscription(TKey key)
         {
-            if (!_valueSubjects.TryGetValue(key, out var subject)) return;
+            if (!valueSubjects.TryGetValue(key, out var subject))
+            {
+                return;
+            }
+            
             subject.Dispose();
-            _valueSubjects.Remove(key);
+            valueSubjects.Remove(key);
         }
     }
 }

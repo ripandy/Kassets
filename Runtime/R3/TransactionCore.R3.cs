@@ -11,13 +11,13 @@ namespace Kadinche.Kassets.Transaction
 {
     public abstract partial class TransactionCore<TRequest, TResponse>
     {
-        private readonly Subject<object> _requestSubject = new();
-        private readonly Subject<TResponse> _responseSubject = new();
+        private readonly Subject<object> requestSubject = new();
+        private readonly Subject<TResponse> responseSubject = new();
         
-        private readonly Queue<(TRequest, Subject<TResponse>)> _subjectRequests = new();
+        private readonly Queue<(TRequest, Subject<TResponse>)> subjectRequests = new();
         
         public Observable<TRequest> RequestAsObservable() => AsObservable();
-        public Observable<TResponse> ResponseAsObservable() => _responseSubject;
+        public Observable<TResponse> ResponseAsObservable() => responseSubject;
     
         public async ValueTask RequestAsync(CancellationToken cancellationToken = default)
         {
@@ -30,29 +30,29 @@ namespace Kadinche.Kassets.Transaction
             var token = linkedTokenSource.Token;
             token.ThrowIfCancellationRequested();
             
-            var responseSubject = new Subject<TResponse>();
-            DefaultToken.Register(() => responseSubject.Dispose());
-            _subjectRequests.Enqueue(new ValueTuple<TRequest, Subject<TResponse>>(request, responseSubject));
-            _requestSubject.OnNext(this);
+            var responseSubj = new Subject<TResponse>();
+            DefaultToken.Register(() => responseSubj.Dispose());
+            subjectRequests.Enqueue(new ValueTuple<TRequest, Subject<TResponse>>(request, responseSubj));
+            requestSubject.OnNext(this);
             Raise(request);
             return WaitResponseAsync(cancellationToken);
         }
         
         private partial void TryRespond()
         {
-            _requestSubject.OnNext(this);
+            requestSubject.OnNext(this);
         }
 
         private partial void RaiseResponse(TResponse response)
         {
             responseValue = response;
-            _responseSubject.OnNext(response);
+            responseSubject.OnNext(response);
         }
         
         public async ValueTask<TResponse> WaitResponseAsync(CancellationToken cancellationToken)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await _responseSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await responseSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public async ValueTask ResponseAsync(Func<TRequest, ValueTask<TResponse>> responseFunc, CancellationToken cancellationToken = default)
@@ -61,19 +61,19 @@ namespace Kadinche.Kassets.Transaction
             var token = linkedTokenSource.Token;
             token.ThrowIfCancellationRequested();
         
-            if (_requests.Count > 0)
+            if (requests.Count > 0)
             {
-                var (request, responseAction) = _requests.Dequeue();
+                var (request, responseAction) = requests.Dequeue();
                 var response = await responseFunc.Invoke(request);
                 responseAction.Invoke(response);
-                _responseSubject.OnNext(response);
+                responseSubject.OnNext(response);
             }
-            else if (_subjectRequests.Count > 0)
+            else if (subjectRequests.Count > 0)
             {
-                var (request, subjectRequest) = _subjectRequests.Dequeue();
+                var (request, subjectRequest) = subjectRequests.Dequeue();
                 var response = await responseFunc.Invoke(request);
                 subjectRequest.OnNext(response);
-                _responseSubject.OnNext(response);
+                responseSubject.OnNext(response);
             }
         }
         
@@ -83,19 +83,19 @@ namespace Kadinche.Kassets.Transaction
             var token = linkedTokenSource.Token;
             token.ThrowIfCancellationRequested();
             
-            if (_requests.Count > 0)
+            if (requests.Count > 0)
             {
-                var (request, responseAction) = _requests.Dequeue();
+                var (request, responseAction) = requests.Dequeue();
                 var response = await responseFunc.Invoke(request, token);
                 responseAction.Invoke(response);
-                _responseSubject.OnNext(response);
+                responseSubject.OnNext(response);
             }
-            else if (_subjectRequests.Count > 0)
+            else if (subjectRequests.Count > 0)
             {
-                var (request, subjectRequest) = _subjectRequests.Dequeue();
+                var (request, subjectRequest) = subjectRequests.Dequeue();
                 var response = await responseFunc.Invoke(request, token);
                 subjectRequest.OnNext(response);
-                _responseSubject.OnNext(response);
+                responseSubject.OnNext(response);
             }
         }
         
@@ -113,10 +113,10 @@ namespace Kadinche.Kassets.Transaction
             responseSubscription?.Dispose();
 
             responseSubscription = responseAndForget?
-                _requestSubject.Subscribe(ResponseAndForget) :
-                _requestSubject.SubscribeAwait(async (_, token) => await ResponseAsync(responseFunc, token));
+                requestSubject.Subscribe(ResponseAndForget) :
+                requestSubject.SubscribeAwait(async (_, token) => await ResponseAsync(responseFunc, token));
         
-            while (_requests.Count > 0 && !cancellationToken.IsCancellationRequested)
+            while (requests.Count > 0 && !cancellationToken.IsCancellationRequested)
             {
                 ResponseAndForget(this);
             }
@@ -139,10 +139,10 @@ namespace Kadinche.Kassets.Transaction
         
             responseSubscription?.Dispose();
             responseSubscription = responseAndForget?
-                _requestSubject.Subscribe(ResponseAndForget) :
-                _requestSubject.SubscribeAwait(async (_, token) => await ResponseAsync(responseFunc, token));
+                requestSubject.Subscribe(ResponseAndForget) :
+                requestSubject.SubscribeAwait(async (_, token) => await ResponseAsync(responseFunc, token));
         
-            while (_requests.Count > 0 && !cancellationToken.IsCancellationRequested)
+            while (requests.Count > 0 && !cancellationToken.IsCancellationRequested)
             {
                 ResponseAndForget(this);
             }
@@ -154,25 +154,25 @@ namespace Kadinche.Kassets.Transaction
 
         private partial IDisposable HandleSubscribe(Func<TRequest, TResponse> responseFunc)
         {
-            return _requestSubject.Subscribe(_ => Response(responseFunc));
+            return requestSubject.Subscribe(_ => Response(responseFunc));
         }
         
         private partial IDisposable HandleSubscribeToResponse(Action action)
         {
-            return _responseSubject.Subscribe(_ => action.Invoke());
+            return responseSubject.Subscribe(_ => action.Invoke());
         }
         
         private partial IDisposable HandleSubscribeToResponse(Action<TResponse> action)
         {
-            return _responseSubject.Subscribe(action);
+            return responseSubject.Subscribe(action);
         }
 
         private partial void DisposeSubscriptions()
         {
-            _requests.Clear();
+            requests.Clear();
             responseSubscription?.Dispose();
-            _requestSubject.Dispose();
-            _responseSubject.Dispose();
+            requestSubject.Dispose();
+            responseSubject.Dispose();
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Kadinche.Kassets.EventSystem
     [CanEditMultipleObjects]
     public class TypedGameEventEditor : GameEventEditor
     {
-        protected virtual string[] ExcludedProperties { get; } = { "m_Script", "_value" };
+        protected virtual string[] ExcludedProperties { get; } = { "m_Script", "value" };
 
         public override void OnInspectorGUI()
         {
@@ -54,7 +54,7 @@ namespace Kadinche.Kassets.EventSystem
 
         protected virtual void DrawCustomProperties()
         {
-            using var value = serializedObject.FindProperty("_value");
+            using var value = serializedObject.FindProperty("value");
             if (value.propertyType == SerializedPropertyType.Generic && !value.isArray)
             {
                 foreach (var child in value.GetChildren())

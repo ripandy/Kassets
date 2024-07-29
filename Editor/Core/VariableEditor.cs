@@ -8,23 +8,23 @@ namespace Kadinche.Kassets.Variable
     [CanEditMultipleObjects]
     public class VariableEditor : TypedGameEventEditor
     {
-        private readonly string[] _instanceSettings = { "valueEventType", "autoResetValue" };
-        private readonly string _instanceSettingsLabel = "Instance Settings";
-        private bool _showInstanceSettings;
+        private readonly string[] instanceSettings = { "valueEventType", "autoResetValue" };
+        private const string InstanceSettingsLabel = "Instance Settings";
+        private bool showInstanceSettings;
 
-        protected override string[] ExcludedProperties => base.ExcludedProperties.Concat(_instanceSettings).ToArray();
+        protected override string[] ExcludedProperties => base.ExcludedProperties.Concat(instanceSettings).ToArray();
 
         protected override void DrawCustomProperties()
         {
             base.DrawCustomProperties();
             
-            _showInstanceSettings = EditorGUILayout.Foldout(_showInstanceSettings, _instanceSettingsLabel);
+            showInstanceSettings = EditorGUILayout.Foldout(showInstanceSettings, InstanceSettingsLabel);
 
-            if (_showInstanceSettings)
+            if (showInstanceSettings)
             {
                 EditorGUI.indentLevel++;
                 
-                foreach (var settingName in _instanceSettings)
+                foreach (var settingName in instanceSettings)
                 {
                     using var prop = serializedObject.FindProperty(settingName);
                     if (prop == null) continue;

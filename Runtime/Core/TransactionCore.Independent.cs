@@ -17,9 +17,9 @@ namespace Kadinche.Kassets.Transaction
             }
         }
 
-        private partial void RaiseResponse(TResponse param)
+        private partial void RaiseResponse(TResponse response)
         {
-            responseValue = param;
+            responseValue = response;
             foreach (var disposable in responseSubscribers)
             {
                 switch (disposable)
@@ -89,31 +89,8 @@ namespace Kadinche.Kassets.Transaction
 
         private partial void DisposeSubscriptions()
         {
-            _requests.Clear();
+            requests.Clear();
             responseSubscription?.Dispose();
-        }
-    }
-    
-    internal class ResponseSubscription<TRequest, TResponse> : IDisposable
-    {
-        private TransactionCore<TRequest, TResponse> _source;
-        private Func<TRequest, TResponse> _responseFunc;
-        
-        public ResponseSubscription(
-            TransactionCore<TRequest, TResponse> source,
-            Func<TRequest, TResponse> responseFunc)
-        {
-            _source = source;
-            _responseFunc = responseFunc;
-        }
-
-        public TResponse Invoke(TRequest param) => _responseFunc.Invoke(param);
-        
-        public void Dispose()
-        {
-            _responseFunc = null;
-            _source.responseSubscription = null;
-            _source = null;
         }
     }
 }

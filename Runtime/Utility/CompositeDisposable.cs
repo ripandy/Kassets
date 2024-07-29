@@ -7,12 +7,16 @@ namespace Kadinche.Kassets
 {
     internal class CompositeDisposable : IDisposable
     {
-        private readonly IList<IDisposable> _disposables = new List<IDisposable>();
-        public void Add(IDisposable disposable) => _disposables.Add(disposable);
+        private readonly IList<IDisposable> disposables = new List<IDisposable>();
+        
+        public void Add(IDisposable disposable)
+        {
+            disposables.Add(disposable);
+        }
 
         public void Dispose()
         {
-            _disposables.Dispose();
+            disposables.Dispose();
         }
     }
 
