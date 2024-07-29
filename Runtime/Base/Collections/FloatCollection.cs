@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Kadinche.Kassets.Collection
 {
     [CreateAssetMenu(fileName = "FloatCollection", menuName = MenuHelper.DefaultCollectionMenu + "FloatCollection")]
-    public class FloatCollection : Collection<float>
+    public sealed class FloatCollection : Collection<float>
     {
     }
 }

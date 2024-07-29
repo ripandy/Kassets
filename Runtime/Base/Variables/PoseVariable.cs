@@ -3,7 +3,7 @@
 namespace Kadinche.Kassets.Variable
 {
     [CreateAssetMenu(fileName = "PoseVariable", menuName = MenuHelper.DefaultVariableMenu + "Pose")]
-    public class PoseVariable : VariableCore<Pose>
+    public sealed class PoseVariable : VariableCore<Pose>
     {
     }
 }

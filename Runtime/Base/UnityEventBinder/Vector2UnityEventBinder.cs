@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Kadinche.Kassets.EventSystem
 {
-    public class Vector2UnityEventBinder : UnityEventBinder<Vector2>
+    public sealed class Vector2UnityEventBinder : UnityEventBinder<Vector2>
     {
     }
 }

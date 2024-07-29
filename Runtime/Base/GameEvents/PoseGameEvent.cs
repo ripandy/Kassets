@@ -3,7 +3,7 @@
 namespace Kadinche.Kassets.EventSystem
 {
     [CreateAssetMenu(fileName = "PoseEvent", menuName = MenuHelper.DefaultGameEventMenu + "PoseEvent")]
-    public class PoseGameEvent : GameEvent<Pose>
+    public sealed class PoseGameEvent : GameEvent<Pose>
     {
     }
 }

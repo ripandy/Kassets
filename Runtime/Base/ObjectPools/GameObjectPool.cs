@@ -5,15 +5,15 @@ using UnityEngine;
 namespace Kadinche.Kassets.ObjectPool
 {
     [CreateAssetMenu(fileName = "NewGameObjectPool", menuName = MenuHelper.DefaultObjectPoolMenu + "GameObjectPool")]
-    public class GameObjectPool : ObjectPoolCore<GameObject>
+    public sealed class GameObjectPool : ObjectPoolCore<GameObject>
     {
-        [SerializeField] private GameObject _targetPrefab;
+        [SerializeField] private GameObject targetPrefab;
 
         public Transform DefaultParent { get; set; } = null;
         
         protected override GameObject CreatePooledItem()
         {
-            var go = Instantiate(_targetPrefab, DefaultParent);
+            var go = Instantiate(targetPrefab, DefaultParent);
             return go;
         }
 

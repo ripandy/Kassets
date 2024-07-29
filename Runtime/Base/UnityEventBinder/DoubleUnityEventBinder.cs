@@ -1,6 +1,6 @@
 namespace Kadinche.Kassets.EventSystem
 {
-    public class DoubleUnityEventBinder : UnityEventBinder<double>
+    public sealed class DoubleUnityEventBinder : UnityEventBinder<double>
     {
     }
 }
