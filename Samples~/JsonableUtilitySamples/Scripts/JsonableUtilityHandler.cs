@@ -24,22 +24,12 @@ namespace Kadinche.Kassets.Variable.Sample
         private void SaveButtonPressed()
         {
             customVariable.SaveToJson();
-            
-            // uncomment to try the experimental non generic handling.
-            // IJsonable jsonable = customVariable;
-            // jsonable.SaveToJson();
-            
             Debug.Log($"[{GetType().Name}] {nameof(customVariable)} saved as json named {customVariable.name}.json");
         }
         
         private void LoadButtonPressed()
         {
             customVariable.LoadFromJson();
-            
-            // uncomment to try the experimental non generic handling.
-            // IJsonable jsonable = customVariable;
-            // jsonable.LoadFromJson();
-            
             Debug.Log($"[{GetType().Name}] loaded {customVariable.name}.json into {nameof(customVariable)}");
         }
     }
