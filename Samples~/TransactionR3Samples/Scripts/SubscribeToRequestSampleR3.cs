@@ -1,0 +1,25 @@
+using System;
+using TMPro;
+using UnityEngine;
+
+namespace Kadinche.Kassets.Transaction.Sample
+{
+    public class SubscribeToRequestSampleR3 : MonoBehaviour
+    {
+        [SerializeField] private FloatTransaction dummyProcessTransaction;
+        [SerializeField] private TMP_Text label;
+
+        private IDisposable subscription;
+
+        private void Start()
+        {
+            subscription = dummyProcessTransaction
+                .SubscribeToRequest(value => label.text = $"Request sent. Request value: {value}");
+        }
+
+        private void OnDestroy()
+        {
+            subscription?.Dispose();
+        }
+    }
+}
