@@ -66,7 +66,7 @@ namespace Kadinche.Kassets.EventSystem
         public new async ValueTask<T> EventAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await valueSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await valueSubject.FirstOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public override void Dispose()
