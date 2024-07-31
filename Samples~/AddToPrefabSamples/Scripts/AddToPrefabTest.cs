@@ -5,62 +5,89 @@ namespace Kadinche.Kassets.Sample
 {
     public class AddToPrefabTest : MonoBehaviour
     {
-        [SerializeField] private IntVariable _someIntVariable;
-        [SerializeField] private StringVariable _someStringVariable;
-        [SerializeField] private SomeScriptableObject _someScriptableObject;
+        [SerializeField] private IntVariable someIntVariable;
+        [SerializeField] private StringVariable someStringVariable;
+        [SerializeField] private SomeScriptableObject someScriptableObject;
         
 #if UNITY_EDITOR
 
         // Add
-        [ContextMenu("Add Int Variable", false)]
-        private void AddIntVariable() => _someIntVariable = gameObject.Add<IntVariable>();
+        [ContextMenu("Add Int Variable")]
+        private void AddIntVariable()
+        {
+            someIntVariable = gameObject.Add<IntVariable>();
+        }
 
         [ContextMenu("Add Int Variable", true)]
-        private bool AddIntVariableValidate() => gameObject.AddValidate<IntVariable>();
-        
-        [ContextMenu("Add String Variable", false)]
-        private void AddStringVariable() => _someStringVariable = gameObject.Add<StringVariable>();
+        private bool AddIntVariableValidate()
+        {
+            return gameObject.AddValidate<IntVariable>();
+        }
+
+        [ContextMenu("Add String Variable")]
+        private void AddStringVariable()
+        {
+            someStringVariable = gameObject.Add<StringVariable>();
+        }
 
         [ContextMenu("Add String Variable", true)]
-        private bool AddStringVariableValidate() => gameObject.AddValidate<StringVariable>();
+        private bool AddStringVariableValidate()
+        {
+            return gameObject.AddValidate<StringVariable>();
+        }
 
-        [ContextMenu("Add SomeScriptableObject", false)]
-        private void AddSomeScriptableObject() => _someScriptableObject = gameObject.Add<SomeScriptableObject>();
+        [ContextMenu("Add SomeScriptableObject")]
+        private void AddSomeScriptableObject()
+        {
+            someScriptableObject = gameObject.Add<SomeScriptableObject>();
+        }
 
         [ContextMenu("Add SomeScriptableObject", true)]
-        private bool AddSomeScriptableObjectValidate() => gameObject.AddValidate<SomeScriptableObject>();
-        
+        private bool AddSomeScriptableObjectValidate()
+        {
+            return gameObject.AddValidate<SomeScriptableObject>();
+        }
+
         // Remove
-        [ContextMenu("Remove Int Variable", false)]
+        [ContextMenu("Remove Int Variable")]
         private void RemoveIntVariable()
         {
             gameObject.Remove<IntVariable>();
-            _someIntVariable = null;
+            someIntVariable = null;
         }
         
         [ContextMenu("Remove Int Variable", true)]
-        private bool RemoveIntVariableValidate() => gameObject.RemoveValidate<IntVariable>();
-        
-        [ContextMenu("Remove String Variable", false)]
+        private bool RemoveIntVariableValidate()
+        {
+            return gameObject.RemoveValidate<IntVariable>();
+        }
+
+        [ContextMenu("Remove String Variable")]
         private void RemoveStringVariable()
         {
             gameObject.Remove<StringVariable>();
-            _someStringVariable = null;
+            someStringVariable = null;
         }
         
         [ContextMenu("Remove String Variable", true)]
-        private bool RemoveStringVariableValidate() => gameObject.RemoveValidate<StringVariable>();
-        
-        [ContextMenu("Remove SomeScriptableObject", false)]
+        private bool RemoveStringVariableValidate()
+        {
+            return gameObject.RemoveValidate<StringVariable>();
+        }
+
+        [ContextMenu("Remove SomeScriptableObject")]
         private void RemoveSomeScriptableObject()
         {
             gameObject.Remove<SomeScriptableObject>();
-            _someScriptableObject = null;
+            someScriptableObject = null;
         }
         
         [ContextMenu("Remove SomeScriptableObject", true)]
-        private bool RemoveSomeScriptableObjectValidate() => gameObject.RemoveValidate<SomeScriptableObject>();
-
+        private bool RemoveSomeScriptableObjectValidate()
+        {
+            return gameObject.RemoveValidate<SomeScriptableObject>();
+        }
+        
 #endif
     }
 }
