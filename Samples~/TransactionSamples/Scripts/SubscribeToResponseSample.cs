@@ -6,20 +6,20 @@ namespace Kadinche.Kassets.Transaction.Sample
 {
     public class SubscribeToResponseSample : MonoBehaviour
     {
-        [SerializeField] private FloatTransaction _dummyProcessTransaction;
-        [SerializeField] private TMP_Text _label;
+        [SerializeField] private FloatTransaction dummyProcessTransaction;
+        [SerializeField] private TMP_Text label;
 
-        private IDisposable _subscription;
+        private IDisposable subscription;
 
         private void Start()
         {
-            _subscription = _dummyProcessTransaction
-                .SubscribeToResponse(value => _label.text = $"Response received. Response value: {value}");
+            subscription = dummyProcessTransaction
+                .SubscribeToResponse(value => label.text = $"Response received. Response value: {value}");
         }
 
         private void OnDestroy()
         {
-            _subscription?.Dispose();
+            subscription?.Dispose();
         }
     }
 }

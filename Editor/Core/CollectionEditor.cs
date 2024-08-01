@@ -1,22 +1,36 @@
 using System.Linq;
-using Kadinche.Kassets.EventSystem;
 using UnityEditor;
 
-namespace Kadinche.Kassets.Variable
+namespace Kadinche.Kassets.Collection
 {
-    [CustomEditor(typeof(VariableCore<>), true)]
+    [CustomEditor(typeof(Collection<>), true)]
     [CanEditMultipleObjects]
-    public class VariableEditor : TypedGameEventEditor
+    public class CollectionEditor : Editor
     {
+        private readonly string[] excludedProperties = { "m_Script", "list" };
         private readonly string[] instanceSettings = { "valueEventType", "autoResetValue" };
         private const string InstanceSettingsLabel = "Instance Settings";
         private bool showInstanceSettings;
 
-        protected override string[] ExcludedProperties => base.ExcludedProperties.Concat(instanceSettings).ToArray();
-
-        protected override void DrawCustomProperties()
+        public override void OnInspectorGUI()
         {
-            base.DrawCustomProperties();
+            serializedObject.Update();
+            
+            using var value = serializedObject.FindProperty("list");
+            if (value.propertyType == SerializedPropertyType.Generic && !value.isArray)
+            {
+                foreach (var child in value.GetChildren())
+                {
+                    EditorGUILayout.PropertyField(child, true);
+                }
+            }
+            else
+            {
+                EditorGUILayout.PropertyField(value, true);
+            }
+
+            var toExclude = excludedProperties.Concat(instanceSettings).ToArray();
+            DrawPropertiesExcluding(serializedObject, toExclude);
             
             showInstanceSettings = EditorGUILayout.Foldout(showInstanceSettings, InstanceSettingsLabel);
 
@@ -27,7 +41,7 @@ namespace Kadinche.Kassets.Variable
                 foreach (var settingName in instanceSettings)
                 {
                     using var prop = serializedObject.FindProperty(settingName);
-
+                    
                     if (prop != null)
                     {
                         EditorGUILayout.PropertyField(prop);
@@ -36,7 +50,7 @@ namespace Kadinche.Kassets.Variable
                 
                 EditorGUI.indentLevel--;
             }
-
+            
             serializedObject.ApplyModifiedProperties();
         }
     }

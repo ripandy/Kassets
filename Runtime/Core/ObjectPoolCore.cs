@@ -3,8 +3,6 @@
  https://docs.unity3d.com/ScriptReference/Pool.ObjectPool_1.html
 */
 
-#if UNITY_2021_1_OR_NEWER
-
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -85,5 +83,3 @@ namespace Kadinche.Kassets
         }
     }
 }
-
-#endif

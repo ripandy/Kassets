@@ -15,4 +15,4 @@ MonoBehaviour:
   poolType: 0
   collectionChecks: 1
   maxPoolSize: 10
-  _targetPrefab: {fileID: 5474015148521013439, guid: d01096e3548aa4adf90c30f4dc3f1531, type: 3}
+  targetPrefab: {fileID: 5474015148521013439, guid: d01096e3548aa4adf90c30f4dc3f1531, type: 3}

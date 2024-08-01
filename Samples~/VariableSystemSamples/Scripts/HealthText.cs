@@ -6,25 +6,25 @@ namespace Kadinche.Kassets.Variable.Sample
 {
     public class HealthText : MonoBehaviour
     {
-        [SerializeField] private FloatVariable _healthVariable;
-        [SerializeField] private FloatVariable _maxHealthVariable;
-        [SerializeField] private TMP_Text _healthText;
+        [SerializeField] private FloatVariable healthVariable;
+        [SerializeField] private FloatVariable maxHealthVariable;
+        [SerializeField] private TMP_Text healthText;
 
-        private IDisposable _subscription;
+        private IDisposable subscription;
         
         private void Start()
         {
-            _subscription = _healthVariable.Subscribe(UpdateHealthText);
+            subscription = healthVariable.Subscribe(UpdateHealthText);
         }
 
         private void UpdateHealthText(float value)
         {
-            _healthText.text = $"{Mathf.FloorToInt(value)}/{_maxHealthVariable.Value}";
+            healthText.text = $"{Mathf.FloorToInt(value)}/{maxHealthVariable.Value}";
         }
         
         private void OnDestroy()
         {
-            _subscription?.Dispose();
+            subscription?.Dispose();
         }
     }
 }

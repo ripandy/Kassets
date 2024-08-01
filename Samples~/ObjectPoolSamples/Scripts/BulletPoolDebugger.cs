@@ -1,5 +1,3 @@
-#if UNITY_2021_1_OR_NEWER
-
 using TMPro;
 using UnityEngine;
 
@@ -7,14 +5,12 @@ namespace Kadinche.Kassets.ObjectPool.Samples
 {
     public class BulletPoolDebugger : MonoBehaviour
     {
-        [SerializeField] private TransformPool _bulletTransformPool;
-        [SerializeField] private TMP_Text _debugText;
+        [SerializeField] private TransformPool bulletTransformPool;
+        [SerializeField] private TMP_Text debugText;
 
         private void Update()
         {
-            _debugText.text = $"Object{(_bulletTransformPool.CountInactive > 1 ? "s" : "")} in Pool: {_bulletTransformPool.CountInactive}";
+            debugText.text = $"Object{(bulletTransformPool.CountInactive > 1 ? "s" : "")} in Pool: {bulletTransformPool.CountInactive}";
         }
     }
 }
-
-#endif

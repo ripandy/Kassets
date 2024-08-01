@@ -5,13 +5,13 @@ namespace Kadinche.Kassets.ObjectPool.Samples
 {
     public class ShootInputProvider : MonoBehaviour
     {
-        [SerializeField] private GameEvent _shootBulletEvent;
-        [SerializeField] private KeyCode _shootKey;
+        [SerializeField] private GameEvent shootBulletEvent;
+        [SerializeField] private KeyCode shootKey;
 
         private void Update()
         {
-            if (Input.GetKeyDown(_shootKey)) 
-                _shootBulletEvent.Raise();
+            if (Input.GetKeyDown(shootKey)) 
+                shootBulletEvent.Raise();
         }
     }
 }

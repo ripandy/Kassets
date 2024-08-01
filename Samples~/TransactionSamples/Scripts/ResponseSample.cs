@@ -5,13 +5,13 @@ namespace Kadinche.Kassets.Transaction.Sample
 {
     public class ResponseSample : MonoBehaviour
     {
-        [SerializeField] private FloatTransaction _dummyProcessTransaction;
+        [SerializeField] private FloatTransaction dummyProcessTransaction;
 
-        private IDisposable _subscription;
+        private IDisposable subscription;
 
         private void Start()
         {
-            _subscription = _dummyProcessTransaction.RegisterResponse(ProcessRequest);
+            subscription = dummyProcessTransaction.RegisterResponse(ProcessRequest);
         }
 
         private float ProcessRequest(float requestValue)
@@ -29,7 +29,7 @@ namespace Kadinche.Kassets.Transaction.Sample
 
         private void OnDestroy()
         {
-            _subscription?.Dispose();
+            subscription?.Dispose();
         }
     }
 }

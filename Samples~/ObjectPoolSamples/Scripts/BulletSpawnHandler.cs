@@ -1,5 +1,3 @@
-#if UNITY_2021_1_OR_NEWER
-
 using System;
 using System.Collections;
 using Kadinche.Kassets.EventSystem;
@@ -9,17 +7,17 @@ namespace Kadinche.Kassets.ObjectPool.Samples
 {
     public class BulletSpawnHandler : MonoBehaviour
     {
-        [SerializeField] private GameEvent _spawnEvent;
-        [SerializeField] private TransformPool _bulletTransformPool;
-        [SerializeField] private float _bulletMaxDistance = 10f;
-        [SerializeField] private float _bulletSpeed = 1f;
+        [SerializeField] private GameEvent spawnEvent;
+        [SerializeField] private TransformPool bulletTransformPool;
+        [SerializeField] private float bulletMaxDistance = 20f;
+        [SerializeField] private float bulletSpeed = 20f;
         
-        private IDisposable _subscription;
+        private IDisposable subscription;
 
         private void Start()
         {
-            _bulletTransformPool.DefaultParent = transform;
-            _subscription = _spawnEvent.Subscribe(Spawn);
+            bulletTransformPool.DefaultParent = transform;
+            subscription = spawnEvent.Subscribe(Spawn);
         }
 
         private void Spawn()
@@ -29,12 +27,12 @@ namespace Kadinche.Kassets.ObjectPool.Samples
 
         private IEnumerator SpawnAndMoveRoutine()
         {
-            using var _ = _bulletTransformPool.Get(out var bullet);
+            using var _ = bulletTransformPool.Get(out var bullet);
 
             var startingPos = bullet.position;
-            while (Vector3.Distance(bullet.position, startingPos) < _bulletMaxDistance)
+            while (Vector3.Distance(bullet.position, startingPos) < bulletMaxDistance)
             {
-                bullet.position += bullet.forward * (_bulletSpeed * Time.deltaTime);
+                bullet.position += bullet.forward * (bulletSpeed * Time.deltaTime);
                 yield return null;
             }
 
@@ -43,9 +41,7 @@ namespace Kadinche.Kassets.ObjectPool.Samples
 
         private void OnDestroy()
         {
-            _subscription?.Dispose();
+            subscription?.Dispose();
         }
     }
 }
-
-#endif

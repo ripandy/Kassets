@@ -52,7 +52,7 @@ namespace Kadinche.Kassets.Transaction
         public async ValueTask<TResponse> WaitResponseAsync(CancellationToken cancellationToken)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await responseSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await responseSubject.FirstOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public async ValueTask ResponseAsync(Func<TRequest, ValueTask<TResponse>> responseFunc, CancellationToken cancellationToken = default)

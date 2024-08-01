@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09eb87d091544176b9916983a034c2fc, type: 3}
   m_Name: IntCollection
   m_EditorClassIdentifier: 
-  _defaultSubscribeBehavior: 0
-  _value: 
-  _variableEventType: 0
-  _autoResetValue: 0
+  list: 
+  valueEventType: 0
+  autoResetValue: 0

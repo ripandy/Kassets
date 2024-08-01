@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f93dbeb8948484eb34d27d9e8774381, type: 3}
   m_Name: TextVariable
   m_EditorClassIdentifier: 
-  buffered: 1
-  _value: 
-  _variableEventType: 0
-  _autoResetValue: 1
+  value: 
+  valueEventType: 0
+  autoResetValue: 1

@@ -15,85 +15,6 @@ namespace Kadinche.Kassets
 #endif
         
         private const string DefaultExtension = ".json";
-        
-        /// <summary>
-        /// Load variable from json string. Note that this uses Reflection.
-        /// </summary>
-        /// <param name="jsonable"></param>
-        /// <param name="jsonString"></param>
-        public static void FromJsonString(this IJsonable jsonable, string jsonString)
-        {
-            // Get the type of variable
-            var variableType = jsonable.GetType();
-            
-            while (variableType is not { IsGenericType: true })
-            {
-                variableType = variableType?.BaseType;
-            }
-
-            // Get the generic type of variable
-            var genericType = variableType.GetGenericArguments()[0];
-            var propertyInfo = variableType.GetProperty("Value");
-            // Get the Value property of variable using reflection
-            var value = propertyInfo?.GetValue(jsonable);
-
-            var simpleType = genericType.IsSimpleType();
-            
-            if (simpleType)
-            {
-                // Create an instance of JsonableWrapper<T> with the value of variable
-                var wrapped = Activator.CreateInstance(typeof(JsonableWrapper<>).MakeGenericType(genericType), value);
-                // Deserialize json string to wrapped
-                JsonUtility.FromJsonOverwrite(jsonString, wrapped);
-                // Get the value of wrapped
-                value = wrapped.GetType().GetField("value").GetValue(wrapped);
-            }
-            else
-            {
-                JsonUtility.FromJsonOverwrite(jsonString, value);
-            }
-            
-            // Get the Value property of variable using reflection and Set the value of the Value property.
-            propertyInfo?.SetValue(jsonable, value);
-        }
-        
-        /// <summary>
-        /// Convert variable to json string. Note that this uses Reflection.
-        /// </summary>
-        /// <param name="jsonable"></param>
-        /// <returns></returns>
-        public static string ToJsonString(this IJsonable jsonable)
-        {
-            // Get the type of variable
-            var variableType = jsonable.GetType();
-            
-            while (variableType is not { IsGenericType: true })
-            {
-                variableType = variableType?.BaseType;
-            }
-
-            // Get the generic type of variable
-            var genericType = variableType.GetGenericArguments()[0];
-            // Get the Value property of variable using reflection
-            var value = variableType.GetProperty("Value")?.GetValue(jsonable);
-
-            var simpleType = genericType.IsSimpleType();
-            string jsonString;
-            
-            if (simpleType)
-            {
-                // Create an instance of JsonableWrapper<T> with the value of variable
-                var wrapped = Activator.CreateInstance(typeof(JsonableWrapper<>).MakeGenericType(genericType), value);
-                // Convert wrapped to json string
-                jsonString = JsonUtility.ToJson(wrapped, Application.isEditor);
-            }
-            else
-            {
-                jsonString = JsonUtility.ToJson(value, Application.isEditor);
-            }
-
-            return jsonString;
-        }
 
         /// <summary>
         /// Load a json file from the given path.
@@ -102,7 +23,12 @@ namespace Kadinche.Kassets
         /// <param name="fullPath">Path to a directory where the json file exist. Path must include the json file.</param>
         public static void LoadFromJson(this IJsonable jsonable, string fullPath)
         {
-            if (!File.Exists(fullPath)) return;
+            if (!File.Exists(fullPath))
+            {
+                Debug.LogError($"Failed to load from json. File not found: {fullPath}");
+                return;
+            }
+            
             var jsonString = File.ReadAllText(fullPath);
             jsonable.FromJsonString(jsonString);
         }
@@ -231,11 +157,11 @@ namespace Kadinche.Kassets
         /// <summary>
         /// Check whether a json file exist in a directory.
         /// </summary>
-        /// <param name="jsonable"></param>
+        /// <param name="_">Throw parameter. Used for method invocation.</param>
         /// <param name="directory">Path to a directory where the json file would exist</param>
         /// /// <param name="filename">Name of the json file</param>
         /// <returns></returns>
-        public static bool IsJsonFileExist(this IJsonable jsonable, string directory, string filename)
+        public static bool IsJsonFileExist(this IJsonable _, string directory, string filename)
         {
             return IsJsonFileExist(directory, filename);
         }

@@ -2,7 +2,7 @@
 
 namespace Kadinche.Kassets.Variable.Sample
 {
-    public class CustomVariable : VariableCore<CustomStruct>
+    public class CustomVariable : JsonableVariable<CustomStruct>
     {
     }
 

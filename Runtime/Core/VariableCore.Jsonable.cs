@@ -16,7 +16,7 @@ namespace Kadinche.Kassets.Variable
         public void FromJsonString(string jsonString)
         {
             var simpleType = Type.IsSimpleType();
-            Value = simpleType
+            value = simpleType
                 ? JsonUtility.FromJson<JsonableWrapper<T>>(jsonString).value
                 : JsonUtility.FromJson<T>(jsonString);
         }
@@ -29,7 +29,7 @@ namespace Kadinche.Kassets.Variable
         {
             var isSimpleType = typeof(T).IsSimpleType();
             return isSimpleType ?
-                JsonUtility.ToJson(new JsonableWrapper<T>(Value), Application.isEditor) :
+                JsonUtility.ToJson(new JsonableWrapper<T>(value), Application.isEditor) :
                 JsonUtility.ToJson(Value, Application.isEditor);
         }
     }

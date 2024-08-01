@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Kadinche.Kassets.Transaction.Sample
 {
-    public class SubscribeToRequestSample : MonoBehaviour
+    public class SubscribeToRequestSampleR3 : MonoBehaviour
     {
         [SerializeField] private FloatTransaction dummyProcessTransaction;
         [SerializeField] private TMP_Text label;

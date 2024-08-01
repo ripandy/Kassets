@@ -47,13 +47,13 @@ namespace Kadinche.Kassets.Collection
         public async ValueTask<T> OnAddAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await onAddSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await onAddSubject.FirstOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public async ValueTask<T> OnRemoveAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await onRemoveSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await onRemoveSubject.FirstOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public async ValueTask OnClearAsync(CancellationToken cancellationToken = default)
@@ -65,13 +65,13 @@ namespace Kadinche.Kassets.Collection
         public async ValueTask<int> CountAsync(CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await countSubject.LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await countSubject.FirstOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
         
         public async ValueTask<T> ValueAtAsync(int index, CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await ValueAtObservable(index).LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await ValueAtObservable(index).FirstOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
     }
 
@@ -95,7 +95,7 @@ namespace Kadinche.Kassets.Collection
         public async ValueTask<TValue> ValueAtAsync(TKey key, CancellationToken cancellationToken = default)
         {
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, DefaultToken);
-            return await ValueAtObservable(key).LastOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
+            return await ValueAtObservable(key).FirstOrDefaultAsync(cancellationToken: linkedTokenSource.Token);
         }
     }
     

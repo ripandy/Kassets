@@ -6,36 +6,36 @@ namespace Kadinche.Kassets.EventSystem.Sample
 {
     public class EventSubscriber : MonoBehaviour
     {
-        [SerializeField] private GameEvent _gameEvent;
-        [SerializeField] private TMP_Text _displayText;
-        [SerializeField] private string[] _textsToDisplay = new[]
+        [SerializeField] private GameEvent gameEvent;
+        [SerializeField] private TMP_Text displayText;
+        [SerializeField] private string[] textsToDisplay = 
         {
             "Every", "time", "event", "is", "fired", "a", "word", "is", "added", "to", "make", "a", "full", "sentence."
         };
 
-        private int _index;
-        private IDisposable _subscription;
+        private int index;
+        private IDisposable subscription;
 
         private void Start()
         {
-            _subscription = _gameEvent.Subscribe(OnEventRaised);
+            subscription = gameEvent.Subscribe(OnEventRaised);
         }
 
         private void OnEventRaised()
         {
-            if (_index >= _textsToDisplay.Length)
+            if (index >= textsToDisplay.Length)
             {
-                _displayText.text = "";
-                _index = 0;
+                displayText.text = "";
+                index = 0;
             }
             
-            _displayText.text += _textsToDisplay[_index] + " ";
-            _index++;
+            displayText.text += textsToDisplay[index] + " ";
+            index++;
         }
 
         private void OnDestroy()
         {
-            _subscription.Dispose();
+            subscription.Dispose();
         }
     }
 }
