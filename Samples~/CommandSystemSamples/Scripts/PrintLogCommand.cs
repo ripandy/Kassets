@@ -5,20 +5,20 @@ namespace Kadinche.Kassets.CommandSystem.Sample
     [CreateAssetMenu(fileName = "PrintLogCommand", menuName = MenuHelper.DefaultCommandMenu + "PrintLogCommand")]
     public class PrintLogCommand : CommandCore
     {
-        [SerializeField] private string _tag;
-        [SerializeField] private string _toPrint = "Debugging...";
-        [SerializeField] private Color _color = Color.white;
-        [SerializeField] private bool _withCounter;
+        [SerializeField] private string tag;
+        [SerializeField] private string toPrint = "Debugging...";
+        [SerializeField] private Color color = Color.white;
+        [SerializeField] private bool withCounter;
 
-        private int _counter;
+        private int counter;
         
         public override void Execute()
         {
             var colorString =
-                ((byte)(_color.r * 255)).ToString("x2") +
-                ((byte)(_color.g * 255)).ToString("x2") +
-                ((byte)(_color.b * 255)).ToString("x2");
-            Debug.Log($"<color=#{colorString}>{(string.IsNullOrEmpty(_tag) ? "" : $"[{_tag}] ")}{_toPrint}{(_withCounter ? $" {_counter++}" : "")}</color>");
+                ((byte)(color.r * 255)).ToString("x2") +
+                ((byte)(color.g * 255)).ToString("x2") +
+                ((byte)(color.b * 255)).ToString("x2");
+            Debug.Log($"<color=#{colorString}>{(string.IsNullOrEmpty(tag) ? "" : $"[{tag}] ")}{toPrint}{(withCounter ? $" {counter++}" : "")}</color>");
         }
     }
 }

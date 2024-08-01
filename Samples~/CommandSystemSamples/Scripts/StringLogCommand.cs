@@ -5,19 +5,19 @@ namespace Kadinche.Kassets.CommandSystem.Sample
     [CreateAssetMenu(fileName = "StringLogCommand", menuName = MenuHelper.DefaultCommandMenu + "StringLogCommand")]
     public class StringLogCommand : CommandCore<string>
     {
-        [SerializeField] private string _tag;
-        [SerializeField] private Color _color = Color.white;
-        [SerializeField] private bool _withCounter;
+        [SerializeField] private string tag;
+        [SerializeField] private Color color = Color.white;
+        [SerializeField] private bool withCounter;
 
-        private int _counter;
+        private int counter;
         
         public override void Execute(string toPrint)
         {
             var colorString =
-                ((byte)(_color.r * 255)).ToString("x2") +
-                ((byte)(_color.g * 255)).ToString("x2") +
-                ((byte)(_color.b * 255)).ToString("x2");
-            Debug.Log($"<color=#{colorString}>{(string.IsNullOrEmpty(_tag) ? "" : $"[{_tag}] ")}{toPrint}{(_withCounter ? $" {_counter++}" : "")}</color>");
+                ((byte)(color.r * 255)).ToString("x2") +
+                ((byte)(color.g * 255)).ToString("x2") +
+                ((byte)(color.b * 255)).ToString("x2");
+            Debug.Log($"<color=#{colorString}>{(string.IsNullOrEmpty(tag) ? "" : $"[{tag}] ")}{toPrint}{(withCounter ? $" {counter++}" : "")}</color>");
         }
     }
 }
