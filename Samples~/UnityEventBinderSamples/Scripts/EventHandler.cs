@@ -1,42 +1,40 @@
 using System;
 using Kadinche.Kassets.Variable;
-using TMPro;
 using UnityEngine;
 
 namespace Kadinche.Kassets.EventSystem.Sample
 {
     public class EventHandler : MonoBehaviour
     {
-        [SerializeField] private GameEvent _gameEvent;
-        [SerializeField] private StringVariable _textVariable;
-        [SerializeField] private string[] _textsToDisplay = new[]
-        {
+        [SerializeField] private GameEvent gameEvent;
+        [SerializeField] private StringVariable textVariable;
+        [SerializeField] private string[] textsToDisplay = {
             "Every", "time", "event", "is", "fired", "a", "word", "is", "added", "to", "make", "a", "full", "sentence."
         };
 
-        private int _index;
-        private IDisposable _subscription;
+        private int index;
+        private IDisposable subscription;
 
         private void Start()
         {
-            _subscription = _gameEvent.Subscribe(OnEventRaised);
+            subscription = gameEvent.Subscribe(OnEventRaised);
         }
 
         private void OnEventRaised()
         {
-            if (_index >= _textsToDisplay.Length)
+            if (index >= textsToDisplay.Length)
             {
-                _textVariable.Value = "";
-                _index = 0;
+                textVariable.Value = "";
+                index = 0;
             }
             
-            _textVariable.Value += _textsToDisplay[_index] + " ";
-            _index++;
+            textVariable.Value += textsToDisplay[index] + " ";
+            index++;
         }
 
         private void OnDestroy()
         {
-            _subscription.Dispose();
+            subscription.Dispose();
         }
     }
 }
