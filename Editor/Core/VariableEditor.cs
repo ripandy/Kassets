@@ -27,8 +27,11 @@ namespace Kadinche.Kassets.Variable
                 foreach (var settingName in instanceSettings)
                 {
                     using var prop = serializedObject.FindProperty(settingName);
-                    if (prop == null) continue;
-                    EditorGUILayout.PropertyField(prop);
+
+                    if (prop != null)
+                    {
+                        EditorGUILayout.PropertyField(prop);
+                    }
                 }
                 
                 EditorGUI.indentLevel--;
