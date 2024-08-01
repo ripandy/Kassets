@@ -1,5 +1,3 @@
-#if UNITY_2021_1_OR_NEWER
-
 using UnityEngine;
 
 namespace Kadinche.Kassets.ObjectPool
@@ -22,5 +20,3 @@ namespace Kadinche.Kassets.ObjectPool
         protected override void OnDestroyPoolObject(GameObject go) => Destroy(go);
     }
 }
-
-#endif
