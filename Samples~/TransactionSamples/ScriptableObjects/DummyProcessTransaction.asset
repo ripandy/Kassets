@@ -12,6 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb22ad120531494eb441eb6e5b9c7d9c, type: 3}
   m_Name: DummyProcessTransaction
   m_EditorClassIdentifier: 
-  defaultSubscribeBehavior: 0
-  _value: 0
+  value: 0
   responseValue: 0
