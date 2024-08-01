@@ -6,43 +6,43 @@ namespace Kadinche.Kassets.Collection.Sample
 {
     public class CollectionViewHandler : MonoBehaviour
     {
-        [SerializeField] private IntCollection _intCollection;
+        [SerializeField] private IntCollection intCollection;
 
-        private readonly List<TMP_Text> _texts = new List<TMP_Text>();
+        private readonly List<TMP_Text> texts = new();
 
         private void Awake()
         {
-            GetComponentsInChildren(true, _texts);
+            GetComponentsInChildren(true, texts);
         }
 
         private void Start()
         {
-            for (var i = 0; i < _texts.Count; i++)
+            for (var i = 0; i < texts.Count; i++)
             {
-                _texts[i].transform.parent.gameObject.SetActive(i < _intCollection.Count);
+                texts[i].transform.parent.gameObject.SetActive(i < intCollection.Count);
                 
                 var j = i;
-                if (i < _intCollection.Count)
+                if (i < intCollection.Count)
                 {
-                    _intCollection.SubscribeToValueAt(i, value => _texts[j].text = "" + value);
+                    intCollection.SubscribeToValueAt(i, value => texts[j].text = "" + value);
                 }
             }
 
-            _intCollection.SubscribeOnAdd(OnCollectionAdded);
-            _intCollection.SubscribeOnRemove(OnCollectionRemoved);
+            intCollection.SubscribeOnAdd(OnCollectionAdded);
+            intCollection.SubscribeOnRemove(OnCollectionRemoved);
         }
 
         private void OnCollectionAdded(int addedValue)
         {
-            var idx = _intCollection.Count - 1;
-            _texts[idx].transform.parent.gameObject.SetActive(true);
-            _intCollection.SubscribeToValueAt(idx, value => _texts[idx].text = _texts[idx].text = "" + value);
+            var idx = intCollection.Count - 1;
+            texts[idx].transform.parent.gameObject.SetActive(true);
+            intCollection.SubscribeToValueAt(idx, value => texts[idx].text = texts[idx].text = "" + value);
         }
         
         private void OnCollectionRemoved(int removedValue)
         {
-            var idx = _intCollection.Count;
-            _texts[idx].transform.parent.gameObject.SetActive(false);
+            var idx = intCollection.Count;
+            texts[idx].transform.parent.gameObject.SetActive(false);
         }
     }
 }
