@@ -5,6 +5,7 @@
 // Must be placed within a folder named "Editor"
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Kadinche.Kassets;
 using UnityEngine;
 using UnityEditor;
@@ -19,9 +20,9 @@ public class ExtendedScriptableObjectDrawer : PropertyDrawer
 {
 	private const int ButtonWidth = 66;
 
-	private static readonly List<string> _ignoreClassFullNames = new() { "TMPro.TMP_FontAsset" };
-	private static readonly List<string> _ignoreField = new() { "m_Script", "_value" };
-	private static readonly List<string> _instanceSettings = new() { "variableEventType", "autoResetValue" };
+	private static readonly List<string> IgnoreClassFullNames = new() { "TMPro.TMP_FontAsset" };
+	private static readonly List<string> IgnoreField = new() { "m_Script", "value", "list" };
+	private static readonly List<string> InstanceSettings = new() { "variableEventType", "autoResetValue" };
 	
 	public override float GetPropertyHeight (SerializedProperty property, GUIContent label) {
 		var totalHeight = EditorGUIUtility.singleLineHeight;
@@ -38,18 +39,17 @@ public class ExtendedScriptableObjectDrawer : PropertyDrawer
 			{
 				do {
 					if (prop.name == "m_Script") continue;
-					if (_instanceSettings.Contains(prop.name)) continue;
+					if (InstanceSettings.Contains(prop.name)) continue;
 
 					var subProp = serializedObject.FindProperty(prop.name);
 					var height = EditorGUI.GetPropertyHeight(subProp, null, true) + EditorGUIUtility.standardVerticalSpacing;
 					
-					if (prop.name == "_value" && prop.propertyType == SerializedPropertyType.Generic && !prop.isArray)
+					if (prop.name == "value" && prop.propertyType == SerializedPropertyType.Generic && !prop.isArray)
 					{
-						height = 0;
-						foreach (var child in subProp.GetChildren())
-						{
-							height += EditorGUI.GetPropertyHeight(child, null, true) + EditorGUIUtility.standardVerticalSpacing;
-						}
+						height = subProp.GetChildren().Sum(child => 
+							EditorGUI.GetPropertyHeight(child, null, true) +
+						    EditorGUIUtility.standardVerticalSpacing
+						);
 					}
 					
 					totalHeight += height;
@@ -66,7 +66,7 @@ public class ExtendedScriptableObjectDrawer : PropertyDrawer
 		EditorGUI.BeginProperty (position, label, property);
 		var type = GetFieldType();
 		
-		if(type == null || _ignoreClassFullNames.Contains(type.FullName)) {
+		if(type == null || IgnoreClassFullNames.Contains(type.FullName)) {
 			EditorGUI.PropertyField(position, property, label);	
 			EditorGUI.EndProperty ();
 			return;
@@ -124,8 +124,8 @@ public class ExtendedScriptableObjectDrawer : PropertyDrawer
 				var y = position.y + EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
 				
 				// draw generic values
-				using var value = serializedObject.FindProperty("_value");
-				
+				using var value = serializedObject.FindProperty("value") ?? serializedObject.FindProperty("list");
+
 				if (value != null)
 				{
 					if (value.propertyType == SerializedPropertyType.Generic && !value.isArray)
@@ -151,8 +151,8 @@ public class ExtendedScriptableObjectDrawer : PropertyDrawer
 				{
 					do {
 						// Don't bother drawing the class file
-						if (_ignoreField.Contains(prop.name)) continue;
-						if (_instanceSettings.Contains(prop.name)) continue;
+						if (IgnoreField.Contains(prop.name)) continue;
+						if (InstanceSettings.Contains(prop.name)) continue;
 						
 						var height = EditorGUI.GetPropertyHeight(prop, new GUIContent(prop.displayName), true);
 						EditorGUI.PropertyField(new Rect(position.x, y, position.width, height), prop, true);
